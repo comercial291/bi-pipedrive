@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>BI Comercial – Route Sales</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#f0f2f7;--sidebar:#0f2440;--sidebar2:#162d52;
+    --accent:#e63946;--green:#2ec4b6;--blue:#4361ee;
+    --purple:#7209b7;--orange:#f4a261;--yellow:#f9c74f;
+    --card:#fff;--text:#1a1a2e;--muted:#6b7280;
+    --border:#e5e7eb;--radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+  /* ── SIDEBAR ── */
+  .sidebar{width:220px;min-width:220px;background:var(--sidebar);display:flex;flex-direction:column;padding:0 0 20px}
+  .logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .logo h2{color:#fff;font-size:15px;font-weight:700;letter-spacing:.3px}
+  .logo p{color:#7fa3cc;font-size:11px;margin-top:3px}
+  .filter-group{padding:18px 14px 0}
+  .filter-group label{display:block;color:#7fa3cc;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+  .filter-group select,.filter-group input{
+    width:100%;background:var(--sidebar2);border:1px solid rgba(255,255,255,.1);
+    color:#fff;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;
+  }
+  .filter-group select option{background:#162d52}
+  .apply-btn{
+    margin:20px 14px 0;width:calc(100% - 28px);background:var(--accent);
+    color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;
+    font-weight:600;cursor:pointer;transition:.2s;
+  }
+  .apply-btn:hover{background:#c1121f}
+  .refresh-badge{margin:14px 14px 0;background:rgba(46,196,182,.15);border:1px solid rgba(46,196,182,.3);
+    border-radius:6px;padding:7px 10px;display:flex;align-items:center;gap:6px}
+  .refresh-badge span{font-size:10px;color:#2ec4b6;font-weight:600}
+  .dot{width:7px;height:7px;border-radius:50%;background:#2ec4b6;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .sidebar-footer{margin-top:auto;padding:14px;text-align:center;color:rgba(255,255,255,.25);font-size:10px}
+
+  /* ── MAIN ── */
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .topbar{background:#fff;border-bottom:1px solid var(--border);padding:14px 28px;
+    display:flex;align-items:center;justify-content:space-between}
+  .topbar h1{font-size:20px;font-weight:700;color:var(--text)}
+  .topbar small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+  .update-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;
+    padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
+  .update-btn:hover{background:#3451d1}
+
+  /* ── ERROR ── */
+  .error-bar{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;
+    padding:10px 18px;font-size:13px;display:none;align-items:center;gap:8px}
+  .error-bar.show{display:flex}
+
+  /* ── TABS ── */
+  .tabs{display:flex;gap:4px;padding:16px 28px 0;background:#fff;border-bottom:1px solid var(--border)}
+  .tab-btn{padding:9px 20px;border:none;background:transparent;font-size:13px;
+    font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;
+    margin-bottom:-1px;border-radius:6px 6px 0 0;transition:.2s}
+  .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);background:#eff3ff}
+  .tab-btn:hover:not(.active){color:var(--text);background:#f9fafb}
+
+  /* ── CONTENT ── */
+  .content{flex:1;overflow-y:auto;padding:22px 28px}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+
+  /* ── DATE QUICK FILTERS ── */
+  .date-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+  .date-bar span{font-size:11px;color:var(--muted);font-weight:600;margin-right:4px}
+  .dq{background:#fff;border:1px solid var(--border);color:var(--muted);border-radius:20px;
+    padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
+  .dq:hover{border-color:var(--blue);color:var(--blue)}
+  .dq.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+  /* ── KPI CARDS ── */
+  .kpi-row{display:grid;gap:14px;margin-bottom:20px}
+  .kpi-row.cols3{grid-template-columns:repeat(3,1fr)}
+  .kpi-row.cols6{grid-template-columns:repeat(6,1fr)}
+  .kcard{background:var(--card);border-radius:var(--radius);padding:18px 20px;
+    border-left:4px solid var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative;overflow:hidden}
+  .kcard.green{border-left-color:var(--green)}
+  .kcard.red{border-left-color:var(--accent)}
+  .kcard.purple{border-left-color:var(--purple)}
+  .kcard.orange{border-left-color:var(--orange)}
+  .kcard.yellow{border-left-color:var(--yellow)}
+  .kcard-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px}
+  .kcard-value{font-size:26px;font-weight:800;color:var(--text);line-height:1}
+  .kcard-sub{font-size:11px;color:var(--muted);margin-top:5px}
+
+  /* ── SECTION HEADER ── */
+  .section-hdr{display:flex;align-items:center;gap:10px;margin:24px 0 14px}
+  .section-hdr .badge{background:var(--green);color:#fff;font-size:11px;font-weight:700;
+    padding:3px 12px;border-radius:20px}
+  .section-hdr .badge.red{background:var(--accent)}
+  .section-hdr .badge.blue{background:var(--blue)}
+  .section-hdr hr{flex:1;border:none;border-top:1px solid var(--border)}
+
+  /* ── CHARTS ── */
+  .chart-card{background:var(--card);border-radius:var(--radius);padding:20px 22px;
+    box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:16px}
+  .chart-card h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:16px;
+    display:flex;align-items:center;gap:8px}
+  .chart-card h3 .icon{font-size:16px}
+  .chart-wrap{position:relative}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+  /* ── FUNNEL CANVAS ── */
+  #funnel-canvas{width:100%;display:block}
+
+  /* ── FUNIL FILTERS ── */
+  .funil-filter-bar{display:flex;align-items:center;gap:12px;background:#fff;
+    border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;
+    box-shadow:0 1px 4px rgba(0,0,0,.06)}
+  .funil-filter-bar label{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
+  .funil-filter-bar select{flex:1;border:1px solid var(--border);border-radius:8px;
+    padding:7px 12px;font-size:13px;color:var(--text);background:#fff;outline:none}
+
+  /* ── TABLE ── */
+  .table-card{background:var(--card);border-radius:var(--radius);
+    box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden;margin-bottom:16px}
+  table{width:100%;border-collapse:collapse}
+  th{background:#f8fafc;font-size:10px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.6px;color:var(--muted);padding:10px 16px;text-align:left;
+    border-bottom:1px solid var(--border)}
+  td{padding:11px 16px;font-size:13px;border-bottom:1px solid #f3f4f6}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#fafbff}
+  .bar-mini{height:6px;border-radius:3px;background:var(--blue);display:inline-block;min-width:2px}
+  .bar-mini.green{background:var(--green)}
+  .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+  .tag.g{background:#d1fae5;color:#065f46}
+  .tag.r{background:#fee2e2;color:#991b1b}
+  .tag.b{background:#eff3ff;color:#3451d1}
+
+  /* ── EQUIPE TABLE ── */
+  .avatar{width:28px;height:28px;border-radius:50%;background:var(--blue);
+    color:#fff;font-size:11px;font-weight:700;display:inline-flex;
+    align-items:center;justify-content:center;margin-right:8px;vertical-align:middle}
+
+  /* ── LOADING ── */
+  .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.8);
+    z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+  .spinner{width:40px;height:40px;border:4px solid #e5e7eb;border-top-color:var(--blue);
+    border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-overlay p{font-size:14px;font-weight:600;color:var(--muted)}
+  .loading-overlay.hidden{display:none}
+
+  /* RESPONSIVE */
+  @media(max-width:900px){
+    .kpi-row.cols6{grid-template-columns:repeat(2,1fr)}
+    .grid2,.grid3{grid-template-columns:1fr}
+    .sidebar{width:180px;min-width:180px}
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <h2>BI Comercial</h2>
+    <p>Route Sales × Pipedrive</p>
+  </div>
+
+  <div class="filter-group" style="margin-top:10px">
+    <label>Funil</label>
+    <select id="f-pipeline"><option value="">Todos os funis</option></select>
+  </div>
+  <div class="filter-group" style="margin-top:12px">
+    <label>Vendedor</label>
+    <select id="f-user"><option value="">Todos</option></select>
+  </div>
+  <div class="filter-group" style="margin-top:12px">
+    <label>Data Inicial</label>
+    <input type="date" id="f-start"/>
+  </div>
+  <div class="filter-group" style="margin-top:10px">
+    <label>Data Final</label>
+    <input type="date" id="f-end"/>
+  </div>
+  <button class="apply-btn" onclick="applyFilters()">Aplicar filtros</button>
+
+  <div class="refresh-badge">
+    <div class="dot"></div>
+    <span id="refresh-label">Auto-refresh: 2:00:00</span>
+  </div>
+  <div class="sidebar-footer">Route Sales © 2026</div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1>Dashboard Comercial</h1>
+      <small id="last-update">—</small>
+    </div>
+    <button class="update-btn" onclick="loadAll()">↻ Atualizar agora</button>
+  </div>
+
+  <div class="error-bar" id="err-bar">
+    <span>⚠</span><span id="err-msg"></span>
+    <button onclick="document.getElementById('err-bar').classList.remove('show')"
+      style="margin-left:auto;background:none;border:none;cursor:pointer;color:#dc2626;font-size:16px">×</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="visao">Visão Geral</button>
+    <button class="tab-btn" data-tab="funil">Funil</button>
+    <button class="tab-btn" data-tab="equipe">Equipe</button>
+    <button class="tab-btn" data-tab="perdas">Motivos de Perda</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══════════════════ VISÃO GERAL ═══════════════════ -->
+    <div class="tab-panel active" id="tab-visao">
+
+      <!-- Quick date filters -->
+      <div class="date-bar">
+        <span>PERÍODO:</span>
+        <button class="dq" data-days="7">7 dias</button>
+        <button class="dq" data-days="30">30 dias</button>
+        <button class="dq active" data-days="90">90 dias</button>
+        <button class="dq" data-days="180">6 meses</button>
+        <button class="dq" data-days="365">1 ano</button>
+        <button class="dq" data-month="cur">Este mês</button>
+        <button class="dq" data-year="cur">Este ano</button>
+      </div>
+
+      <!-- KPIs gerais -->
+      <div class="kpi-row cols3">
+        <div class="kcard blue">
+          <div class="kcard-label">Total de Leads</div>
+          <div class="kcard-value" id="k-total">—</div>
+          <div class="kcard-sub">Criados no período</div>
+        </div>
+        <div class="kcard purple">
+          <div class="kcard-label">Taxa de Conversão</div>
+          <div class="kcard-value" id="k-conv">—</div>
+          <div class="kcard-sub">Ganhos / Total criados</div>
+        </div>
+        <div class="kcard orange">
+          <div class="kcard-label">Em Aberto</div>
+          <div class="kcard-value" id="k-open">—</div>
+          <div class="kcard-sub">Pipeline ativo</div>
+        </div>
+      </div>
+
+      <!-- GANHOS -->
+      <div class="section-hdr">
+        <div class="badge">✔ Ganhos</div><hr/>
+      </div>
+      <div class="kpi-row cols3">
+        <div class="kcard green">
+          <div class="kcard-label">Negócios Ganhos</div>
+          <div class="kcard-value" id="k-won">—</div>
+          <div class="kcard-sub">Fechamentos</div>
+        </div>
+        <div class="kcard green">
+          <div class="kcard-label">Valor Ganho</div>
+          <div class="kcard-value" id="k-val">—</div>
+          <div class="kcard-sub">Receita fechada</div>
+        </div>
+        <div class="kcard green">
+          <div class="kcard-label">Ticket Médio</div>
+          <div class="kcard-value" id="k-ticket">—</div>
+          <div class="kcard-sub">Por negócio ganho</div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="chart-card">
+          <h3><span class="icon">📈</span>Ganhos por Mês</h3>
+          <div class="chart-wrap"><canvas id="ch-won" height="180"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3><span class="icon">💰</span>Valor Ganho por Mês (R$)</h3>
+          <div class="chart-wrap"><canvas id="ch-val" height="180"></canvas></div>
+        </div>
+      </div>
+
+      <!-- PERDAS -->
+      <div class="section-hdr">
+        <div class="badge red">✖ Perdas</div><hr/>
+      </div>
+      <div class="kpi-row cols3">
+        <div class="kcard red">
+          <div class="kcard-label">Negócios Perdidos</div>
+          <div class="kcard-value" id="k-lost">—</div>
+          <div class="kcard-sub">Oportunidades perdidas</div>
+        </div>
+        <div class="kcard red">
+          <div class="kcard-label">Taxa de Perda</div>
+          <div class="kcard-value" id="k-loss-rate">—</div>
+          <div class="kcard-sub">Perdidos / Total criados</div>
+        </div>
+        <div class="kcard yellow">
+          <div class="kcard-label">Tempo Médio p/ Fechar</div>
+          <div class="kcard-value" id="k-cycle">—</div>
+          <div class="kcard-sub">Dias até fechar/perder</div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3><span class="icon">📊</span>Leads por Mês – Criados, Ganhos e Perdidos</h3>
+        <div class="chart-wrap"><canvas id="ch-monthly" height="160"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ FUNIL ═══════════════════ -->
+    <div class="tab-panel" id="tab-funil">
+
+      <div class="funil-filter-bar">
+        <label>🔽 FUNIL:</label>
+        <select id="f2-pipeline" onchange="onFunilChange()">
+          <option value="">Todos os funis</option>
+        </select>
+      </div>
+
+      <div class="grid2">
+        <div class="chart-card">
+          <h3><span class="icon">🔻</span>Funil de Vendas</h3>
+          <canvas id="funnel-canvas" height="300"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3><span class="icon">📊</span>Taxa de Conversão por Etapa (%)</h3>
+          <div class="chart-wrap"><canvas id="ch-conv" height="300"></canvas></div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Etapa</th>
+              <th>Total</th>
+              <th>Ganhos</th>
+              <th>Perdidos</th>
+              <th>Em Aberto</th>
+              <th>Conversão</th>
+              <th>Distribuição</th>
+            </tr>
+          </thead>
+          <tbody id="stage-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ EQUIPE ═══════════════════ -->
+    <div class="tab-panel" id="tab-equipe">
+      <div class="chart-card">
+        <h3><span class="icon">👥</span>Performance por Vendedor</h3>
+        <div class="chart-wrap"><canvas id="ch-team" height="220"></canvas></div>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Vendedor</th>
+              <th>Leads</th>
+              <th>Ganhos</th>
+              <th>Perdidos</th>
+              <th>Em Aberto</th>
+              <th>Conversão</th>
+              <th>Valor Ganho</th>
+            </tr>
+          </thead>
+          <tbody id="team-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ MOTIVOS DE PERDA ═══════════════════ -->
+    <div class="tab-panel" id="tab-perdas">
+      <div class="grid2">
+        <div class="chart-card">
+          <h3><span class="icon">🥧</span>Motivos de Perda</h3>
+          <div class="chart-wrap"><canvas id="ch-reasons" height="280"></canvas></div>
+        </div>
+        <div class="chart-card" style="display:flex;flex-direction:column;justify-content:center">
+          <h3><span class="icon">📋</span>Detalhamento</h3>
+          <div id="reasons-list" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <p id="loading-msg">Carregando dados…</p>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const S = {
+  deals: [], pipelines: [], users: [], stages: [],
+  stageMap: {}, pipeMap: {}, userMap: {},
+  filters: { pipeline:'', user:'', start:'', end:'' }
+};
+let charts = {};
+let refreshTimer, refreshSec = 7200;
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+const api = path => fetch('/proxy/'+path).then(r=>r.json());
+const $ = id => document.getElementById(id);
+const fmt = n => n >= 1e6 ? 'R$'+(n/1e6).toFixed(1)+'M'
+              : n >= 1e3 ? 'R$'+(n/1e3).toFixed(0)+'k'
+              : 'R$'+n.toFixed(0);
+const pct = (a,b) => b>0 ? (a/b*100).toFixed(1)+'%' : '0%';
+function mkChart(id,cfg){ if(charts[id])charts[id].destroy(); charts[id]=new Chart($(id),cfg); }
+
+// ─── DATES ───────────────────────────────────────────────────────────────────
+function setDates(start, end){
+  $('f-start').value = start.toISOString().slice(0,10);
+  $('f-end').value   = end.toISOString().slice(0,10);
+  S.filters.start    = $('f-start').value;
+  S.filters.end      = $('f-end').value;
+}
+function applyQuickDate(btn){
+  document.querySelectorAll('.dq').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const now = new Date();
+  if(btn.dataset.days){ setDates(new Date(now - btn.dataset.days*864e5), now); }
+  else if(btn.dataset.month){ setDates(new Date(now.getFullYear(),now.getMonth(),1), now); }
+  else if(btn.dataset.year){ setDates(new Date(now.getFullYear(),0,1), now); }
+  loadAll();
+}
+document.querySelectorAll('.dq').forEach(b => b.addEventListener('click', ()=>applyQuickDate(b)));
+
+// ─── LOADING / ERROR ──────────────────────────────────────────────────────────
+function showLoad(msg){ $('loading-msg').textContent=msg||'Carregando…'; $('loading').classList.remove('hidden'); }
+function hideLoad(){ $('loading').classList.add('hidden'); }
+function showErr(msg){ $('err-msg').textContent=msg; $('err-bar').classList.add('show'); }
+function hideErr(){ $('err-bar').classList.remove('show'); }
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    $('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='funil') renderFunil();
+  });
+});
+
+// ─── LOAD FILTERS (pipelines + users + stages) ────────────────────────────────
+async function loadFilters(){
+  const [pRes, uRes, sRes] = await Promise.all([
+    api('pipelines?limit=100'),
+    api('users?limit=100'),
+    api('stages?limit=500')
+  ]);
+  // pipelines
+  S.pipelines = (pRes.data||[]);
+  S.pipeMap   = {};
+  ['f-pipeline','f2-pipeline'].forEach(id=>{
+    const sel = $(id); sel.innerHTML='<option value="">Todos os funis</option>';
+    S.pipelines.forEach(p=>{
+      S.pipeMap[p.id]=p.name;
+      sel.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+    });
+  });
+  // users
+  S.users = (uRes.data||[]).filter(u=>u.active_flag);
+  S.userMap = {};
+  const uSel = $('f-user'); uSel.innerHTML='<option value="">Todos</option>';
+  S.users.forEach(u=>{ S.userMap[u.id]=u.name; uSel.innerHTML+=`<option value="${u.id}">${u.name}</option>`; });
+  // stages
+  S.stages = (sRes.data||[]);
+  S.stageMap = {};
+  S.stages.forEach(s=>{ S.stageMap[s.id]={name:s.name, pipeline:s.pipeline_id, order:s.order_nr||0}; });
+}
+
+// ─── FETCH ALL DEALS ─────────────────────────────────────────────────────────
+async function fetchDeals(){
+  let all=[], start=0, limit=500;
+  while(true){
+    const r = await api(`deals?status=all_not_deleted&start=${start}&limit=${limit}`);
+    if(!r.success) throw new Error(r.error||'Erro ao buscar deals');
+    const data = r.data||[];
+    all = all.concat(data);
+    if(!r.additional_data?.pagination?.more_items_in_collection) break;
+    start += limit;
+    showLoad(`Carregando negócios… (${all.length})`);
+  }
+  return all;
+}
+
+// ─── FILTER DEALS ────────────────────────────────────────────────────────────
+function filterDeals(){
+  const {pipeline, user, start, end} = S.filters;
+  const sd = start ? new Date(start) : null;
+  const ed = end   ? new Date(end+'T23:59:59') : null;
+  return S.deals.filter(d=>{
+    if(pipeline && String(d.pipeline_id)!==String(pipeline)) return false;
+    if(user && String(d.user_id?.id||d.user_id)!==String(user)) return false;
+    const dt = new Date(d.add_time||d.update_time);
+    if(sd && dt < sd) return false;
+    if(ed && dt > ed) return false;
+    return true;
+  });
+}
+
+// ─── APPLY FILTERS BUTTON ────────────────────────────────────────────────────
+function applyFilters(){
+  S.filters.pipeline = $('f-pipeline').value;
+  S.filters.user     = $('f-user').value;
+  S.filters.start    = $('f-start').value;
+  S.filters.end      = $('f-end').value;
+  renderAll();
+}
+
+// ─── COMPUTE METRICS ─────────────────────────────────────────────────────────
+function computeMetrics(deals){
+  let total=0, won=0, lost=0, open=0, valWon=0, cycleSum=0, cycleN=0;
+  const byMonth={}, byStage={}, byUser={}, byReason={};
+
+  deals.forEach(d=>{
+    total++;
+    const status = d.status;
+    const mon = (d.add_time||'').slice(0,7);
+    if(!byMonth[mon]) byMonth[mon]={c:0,w:0,l:0};
+    byMonth[mon].c++;
+
+    const stageId = d.stage_id;
+    const stageName = S.stageMap[stageId]?.name || d.stage_name || `Etapa ${stageId}`;
+    const stageOrder = S.stageMap[stageId]?.order || 0;
+    if(!byStage[stageName]) byStage[stageName]={total:0,won:0,lost:0,open:0,order:stageOrder};
+    byStage[stageName].total++;
+
+    const uid   = d.user_id?.id||d.user_id||0;
+    const uName = S.userMap[uid]||d.user_id?.name||'Sem vendedor';
+    if(!byUser[uName]) byUser[uName]={total:0,won:0,lost:0,open:0,val:0};
+    byUser[uName].total++;
+
+    if(status==='won'){
+      won++; valWon+=(d.value||0);
+      byMonth[mon].w++;
+      byStage[stageName].won++;
+      byUser[uName].won++; byUser[uName].val+=(d.value||0);
+      if(d.won_time&&d.add_time){
+        const days=(new Date(d.won_time)-new Date(d.add_time))/864e5;
+        if(days>=0){cycleSum+=days;cycleN++;}
+      }
+    } else if(status==='lost'){
+      lost++;
+      byMonth[mon].l++;
+      byStage[stageName].lost++;
+      byUser[uName].lost++;
+      const reason = d.lost_reason||'Não informado';
+      byReason[reason]=(byReason[reason]||0)+1;
+      if(d.lost_time&&d.add_time){
+        const days=(new Date(d.lost_time)-new Date(d.add_time))/864e5;
+        if(days>=0){cycleSum+=days;cycleN++;}
+      }
+    } else {
+      open++;
+      byStage[stageName].open++;
+      byUser[uName].open++;
+    }
+  });
+
+  return {total,won,lost,open,valWon,byMonth,byStage,byUser,byReason,
+          cycle: cycleN>0 ? Math.round(cycleSum/cycleN) : 0};
+}
+
+// ─── RENDER VISÃO GERAL ──────────────────────────────────────────────────────
+function renderVisao(m){
+  $('k-total').textContent   = m.total.toLocaleString('pt-BR');
+  $('k-conv').textContent    = pct(m.won, m.total);
+  $('k-open').textContent    = m.open.toLocaleString('pt-BR');
+  $('k-won').textContent     = m.won.toLocaleString('pt-BR');
+  $('k-val').textContent     = fmt(m.valWon);
+  $('k-ticket').textContent  = m.won>0 ? fmt(m.valWon/m.won) : 'R$0';
+  $('k-lost').textContent    = m.lost.toLocaleString('pt-BR');
+  $('k-loss-rate').textContent = pct(m.lost, m.total);
+  $('k-cycle').textContent   = m.cycle>0 ? m.cycle+' dias' : '—';
+
+  const months = Object.keys(m.byMonth).sort();
+  const lbls   = months.map(k=>{ const [y,mo]=k.split('-'); return new Date(y,+mo-1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}); });
+
+  mkChart('ch-monthly',{type:'bar',data:{
+    labels:lbls,
+    datasets:[
+      {label:'Criados', data:months.map(k=>m.byMonth[k].c), backgroundColor:'rgba(67,97,238,.75)', borderRadius:4},
+      {label:'Ganhos',  data:months.map(k=>m.byMonth[k].w), backgroundColor:'rgba(46,196,182,.75)', borderRadius:4},
+      {label:'Perdidos',data:months.map(k=>m.byMonth[k].l), backgroundColor:'rgba(230,57,70,.75)',   borderRadius:4},
+    ]},
+    options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}
+  });
+  mkChart('ch-won',{type:'line',data:{
+    labels:lbls,
+    datasets:[{label:'Ganhos',data:months.map(k=>m.byMonth[k].w),
+      borderColor:'#2ec4b6',backgroundColor:'rgba(46,196,182,.15)',
+      fill:true,tension:.4,pointBackgroundColor:'#2ec4b6',pointRadius:4}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}
+  });
+  mkChart('ch-val',{type:'bar',data:{
+    labels:lbls,
+    datasets:[{label:'R$ Ganho',data:months.map(k=>{
+      let v=0; filterDeals().filter(d=>d.status==='won'&&(d.add_time||'').slice(0,7)===k).forEach(d=>v+=(d.value||0)); return v;
+    }),backgroundColor:'rgba(46,196,182,.7)',borderRadius:4}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{callback:v=>fmt(v)}}}}
+  });
+}
+
+// ─── FUNIL VISUAL (Canvas trapézio) ──────────────────────────────────────────
+function drawFunnelCanvas(stages){
+  const canvas = $('funnel-canvas');
+  const W = canvas.parentElement.clientWidth || 500;
+  canvas.width  = W;
+  canvas.height = 300;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,W,300);
+
+  const entries = Object.entries(stages).sort((a,b)=>a[1].order-b[1].order);
+  if(!entries.length){ ctx.fillStyle='#9ca3af'; ctx.font='14px Inter'; ctx.textAlign='center'; ctx.fillText('Sem dados',W/2,150); return; }
+
+  const maxT   = Math.max(...entries.map(([,v])=>v.total)) || 1;
+  const N      = entries.length;
+  const stH    = Math.max(Math.min(280/N, 52), 28);
+  const topW   = W * 0.9;
+  const minW   = W * 0.18;
+  const startY = (300 - stH*N)/2;
+
+  const colors = ['#4361ee','#7b52d9','#b040c9','#e94560','#f5a623','#2ec4b6','#0dcaf0','#ff6b6b'];
+
+  entries.forEach(([name, v], i)=>{
+    const ratioTop  = i===0 ? 1 : entries[i-1][1].total/maxT;
+    const ratioBot  = v.total/maxT;
+    const wTop      = minW + (topW-minW)*ratioTop;
+    const wBot      = minW + (topW-minW)*ratioBot*0.92;
+    const xTop      = (W-wTop)/2;
+    const xBot      = (W-wBot)/2;
+    const y         = startY + i*stH;
+
+    const nextRatioBot = i<N-1 ? entries[i+1][1].total/maxT : ratioBot*0.85;
+    const wNext = minW + (topW-minW)*nextRatioBot*0.92;
+    const xNext = (W-wNext)/2;
+
+    ctx.beginPath();
+    ctx.moveTo(xTop, y);
+    ctx.lineTo(xTop+wTop, y);
+    ctx.lineTo(xNext+wNext, y+stH-1);
+    ctx.lineTo(xNext, y+stH-1);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0,y,0,y+stH);
+    const col  = colors[i%colors.length];
+    grad.addColorStop(0, col+'ee'); grad.addColorStop(1, col+'99');
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.fillStyle='#fff';
+    const fs = Math.min(13, stH*0.38);
+    ctx.font = `600 ${fs}px Inter,sans-serif`;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    const conv = v.won+v.lost>0 ? (v.won/(v.won+v.lost)*100).toFixed(0)+'%' : '—';
+    const label = `${name.length>22?name.slice(0,20)+'…':name}  •  ${v.total}  •  conv ${conv}`;
+    ctx.fillText(label, W/2, y+stH/2);
+  });
+}
+
+// ─── RENDER FUNIL TAB ────────────────────────────────────────────────────────
+function onFunilChange(){
+  const pid = $('f2-pipeline').value;
+  $('f-pipeline').value = pid;
+  S.filters.pipeline = pid;
+  renderFunil();
+}
+
+function renderFunil(){
+  const deals = filterDeals();
+  const m = computeMetrics(deals);
+  const stages = m.byStage;
+
+  drawFunnelCanvas(stages);
+
+  const entries = Object.entries(stages).sort((a,b)=>a[1].order-b[1].order);
+  const lbls = entries.map(([n])=>n.length>18?n.slice(0,16)+'…':n);
+  const convData = entries.map(([,v])=>v.won+v.lost>0 ? +(v.won/(v.won+v.lost)*100).toFixed(1) : 0);
+
+  mkChart('ch-conv',{type:'bar',data:{
+    labels:lbls,
+    datasets:[{label:'Conversão %', data:convData,
+      backgroundColor:convData.map(v=>v>50?'rgba(46,196,182,.8)':v>25?'rgba(243,186,47,.8)':'rgba(230,57,70,.8)'),
+      borderRadius:6}]},
+    options:{responsive:true,indexAxis:'y',
+      plugins:{legend:{display:false},datalabels:{display:false}},
+      scales:{x:{max:100,ticks:{callback:v=>v+'%'},grid:{display:false}},y:{grid:{display:false}}}}
+  });
+
+  const maxT = Math.max(...entries.map(([,v])=>v.total))||1;
+  const tbody = $('stage-tbody');
+  tbody.innerHTML = entries.map(([name,v])=>{
+    const conv = v.won+v.lost>0 ? (v.won/(v.won+v.lost)*100).toFixed(1) : 0;
+    const barW  = Math.round(v.total/maxT*120);
+    return `<tr>
+      <td><strong>${name}</strong></td>
+      <td>${v.total.toLocaleString('pt-BR')}</td>
+      <td><span class="tag g">${v.won}</span></td>
+      <td><span class="tag r">${v.lost}</span></td>
+      <td>${v.open}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="bar-mini ${+conv>50?'green':''}" style="width:${barW}px"></div>
+          <span style="font-weight:700;color:${+conv>50?'#2ec4b6':+conv>25?'#f4a261':'#e63946'}">${conv}%</span>
+        </div>
+      </td>
+      <td><div style="background:#e5e7eb;border-radius:4px;height:6px;width:120px;overflow:hidden">
+        <div style="background:var(--blue);width:${barW}px;height:100%;border-radius:4px"></div>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── RENDER EQUIPE ────────────────────────────────────────────────────────────
+function renderEquipe(m){
+  const entries = Object.entries(m.byUser).sort((a,b)=>b[1].won-a[1].won);
+  const lbls = entries.map(([n])=>n.split(' ')[0]);
+  mkChart('ch-team',{type:'bar',data:{
+    labels:lbls,
+    datasets:[
+      {label:'Ganhos', data:entries.map(([,v])=>v.won),  backgroundColor:'rgba(46,196,182,.8)', borderRadius:4},
+      {label:'Perdidos',data:entries.map(([,v])=>v.lost), backgroundColor:'rgba(230,57,70,.8)',  borderRadius:4},
+      {label:'Aberto', data:entries.map(([,v])=>v.open),  backgroundColor:'rgba(67,97,238,.8)',  borderRadius:4},
+    ]},
+    options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}
+  });
+
+  $('team-tbody').innerHTML = entries.map(([name,v])=>{
+    const ini = name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    const conv = pct(v.won, v.won+v.lost);
+    return `<tr>
+      <td><span class="avatar">${ini}</span>${name}</td>
+      <td>${v.total}</td>
+      <td><span class="tag g">${v.won}</span></td>
+      <td><span class="tag r">${v.lost}</span></td>
+      <td><span class="tag b">${v.open}</span></td>
+      <td><strong>${conv}</strong></td>
+      <td>${fmt(v.val)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── RENDER MOTIVOS DE PERDA ──────────────────────────────────────────────────
+function renderPerdas(m){
+  const entries = Object.entries(m.byReason).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const total   = entries.reduce((s,[,v])=>s+v,0)||1;
+  const palette = ['#e63946','#f4a261','#7b52d9','#4361ee','#2ec4b6','#f9c74f','#b040c9','#0dcaf0','#ff6b6b','#adb5bd'];
+
+  mkChart('ch-reasons',{type:'doughnut',data:{
+    labels:entries.map(([n])=>n),
+    datasets:[{data:entries.map(([,v])=>v), backgroundColor:palette, borderWidth:2, borderColor:'#fff'}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}
+  });
+
+  $('reasons-list').innerHTML = entries.map(([reason,cnt],i)=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:10px;height:10px;border-radius:50%;background:${palette[i]};flex-shrink:0"></div>
+      <div style="flex:1;font-size:13px">${reason}</div>
+      <div style="font-weight:700;font-size:13px">${cnt}</div>
+      <div style="font-size:11px;color:var(--muted)">${(cnt/total*100).toFixed(0)}%</div>
+    </div>`).join('');
+}
+
+// ─── RENDER ALL ──────────────────────────────────────────────────────────────
+function renderAll(){
+  hideErr();
+  const deals = filterDeals();
+  const m     = computeMetrics(deals);
+  renderVisao(m);
+  renderEquipe(m);
+  renderPerdas(m);
+  // Funil só se aba estiver ativa
+  if(document.querySelector('[data-tab="funil"]').classList.contains('active')) renderFunil();
+  $('last-update').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR');
+}
+
+// ─── LOAD ALL ────────────────────────────────────────────────────────────────
+async function loadAll(){
+  showLoad('Conectando ao Pipedrive…');
+  hideErr();
+  try {
+    showLoad('Carregando filtros…');
+    await loadFilters();
+    showLoad('Baixando negócios…');
+    S.deals = await fetchDeals();
+    renderAll();
+  } catch(e){
+    showErr(e.message||'Erro desconhecido');
+  } finally {
+    hideLoad();
+  }
+}
+
+// ─── AUTO REFRESH ─────────────────────────────────────────────────────────────
+function startRefresh(){
+  clearInterval(refreshTimer);
+  refreshSec = 300;
+  refreshTimer = setInterval(()=>{
+    refreshSec--;
+    const h=String(Math.floor(refreshSec/3600)).padStart(1,'0');
+    const m=String(Math.floor((refreshSec%3600)/60)).padStart(2,'0');
+    const s=String(refreshSec%60).padStart(2,'0');
+    $('refresh-label').textContent = `Auto-refresh: ${h}:${m}:${s}`;
+    if(refreshSec<=0){ loadAll(); startRefresh(); }
+  }, 1000);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+(function init(){
+  const now = new Date();
+  setDates(new Date(now - 90*864e5), now);
+  S.filters.start = $('f-start').value;
+  S.filters.end   = $('f-end').value;
+  loadAll();
+  startRefresh();
+})();
+</script>
+</body>
+</html>

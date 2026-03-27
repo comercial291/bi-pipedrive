@@ -1,0 +1,6 @@
+cloudflared.exe
+*.ps1
+start.bat
+__pycache__/
+*.pyc
+.env
