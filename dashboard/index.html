@@ -672,9 +672,10 @@ function matchesPipelineName(pipeName, filter) {
 // ─────────────────────────────────────────────
 async function apiGet(path, attempt = 1) {
   const url = '/proxy/' + path;
+  const timeoutMs = attempt === 1 ? 90000 : 30000;
   try {
     const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), 25000);
+    const tid = setTimeout(() => ctrl.abort(), timeoutMs);
     const resp = await fetch(url, { signal: ctrl.signal });
     clearTimeout(tid);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -682,14 +683,29 @@ async function apiGet(path, attempt = 1) {
   } catch(e) {
     const retryable = e.name === 'AbortError' || (e.message && e.message.includes('503')) ||
                       e.name === 'TypeError';
-    if (retryable && attempt <= 5) {
-      const wait = [0, 10000, 15000, 20000, 20000, 20000][attempt] || 20000;
+    if (retryable && attempt <= 3) {
+      const wait = [0, 5000, 10000][attempt] || 10000;
       const secs = wait / 1000;
-      setOverlay(`Servidor acordando… tentativa ${attempt}/5`, `Aguardando ${secs}s antes de tentar novamente`);
+      setOverlay(`Servidor acordando… tentativa ${attempt}/3`, `Aguardando ${secs}s antes de tentar novamente`);
       await new Promise(r => setTimeout(r, wait));
       return apiGet(path, attempt + 1);
     }
     throw e;
+  }
+}
+
+async function wakeServer() {
+  setOverlay('Conectando ao servidor…', 'Aguardando o servidor iniciar (pode levar até 60s)');
+  const deadline = Date.now() + 90000;
+  while (Date.now() < deadline) {
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 10000);
+      const r = await fetch('/ping', { signal: ctrl.signal });
+      clearTimeout(tid);
+      if (r.ok) return;
+    } catch(_) {}
+    await new Promise(r => setTimeout(r, 3000));
   }
 }
 
@@ -755,6 +771,7 @@ async function loadUsers() {
 async function init() {
   showLoading(true);
   showError('');
+  await wakeServer();
   setOverlay('Carregando dados do Pipedrive…', 'Buscando negócios, usuários e atividades');
   try {
     const [pipelines, users, deals, actOpen, actDone] = await Promise.all([

@@ -14,6 +14,10 @@ def index():
 def static_files(filename):
     return send_from_directory("dashboard", filename)
 
+@app.route("/ping")
+def ping():
+    return "ok", 200
+
 @app.route("/proxy/<path:endpoint>")
 def proxy(endpoint):
     params = dict(request.args)
