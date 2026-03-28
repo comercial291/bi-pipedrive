@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {
   --bg: #f8f9fa;
@@ -2238,14 +2237,13 @@ function forceRefresh() {
 }
 
 // ─────────────────────────────────────────────
-// BOOT
+// BOOT — chamado diretamente após Chart.js carregado
 // ─────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
+function boot() {
   const now     = new Date();
   const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
   const s = yearAgo.toISOString().slice(0,10);
   const e = now.toISOString().slice(0,10);
-  // Set default dates on all tab filter bars
   for (let i = 0; i < 6; i++) {
     const startEl = document.getElementById(`tf-${i}-start`);
     const endEl   = document.getElementById(`tf-${i}-end`);
@@ -2255,7 +2253,9 @@ window.addEventListener('DOMContentLoaded', () => {
     tabFilters[i].dateEnd   = e;
   }
   init();
-});
+}
 </script>
+<!-- Chart.js carregado aqui (fim do body) → DOM já parseado, sem bloquear renderização -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" onload="boot()" onerror="document.getElementById('overlayMsg').textContent='Erro ao carregar Chart.js — recarregue a página'"></script>
 </body>
 </html>
