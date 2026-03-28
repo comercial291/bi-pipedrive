@@ -875,9 +875,16 @@ async function init() {
       stages.forEach(s => { allStages[s.id] = { name: s.name, pipeline_id: p.id, pipeline_name: p.name, order: s.order_nr }; });
     }));
 
-    allDeals = deals;
-    allActivities = actOpen;
-    allActivitiesDone = actDone;
+    // Filtrar apenas os funis permitidos (PIPELINE_NAMES)
+    const allowedPipeIds = new Set(
+      allPipelines
+        .filter(p => PIPELINE_NAMES.some(name => matchesPipelineName(p.name, name)))
+        .map(p => p.id)
+    );
+    allPipelines = allPipelines.filter(p => allowedPipeIds.has(p.id));
+    allDeals = deals.filter(d => allowedPipeIds.has(d.pipeline_id));
+    allActivities = actOpen.filter(a => !a.pipeline_id || allowedPipeIds.has(a.pipeline_id));
+    allActivitiesDone = actDone.filter(a => !a.pipeline_id || allowedPipeIds.has(a.pipeline_id));
 
     populateVendedorFilter(users);
     buildPipelineTabs();
