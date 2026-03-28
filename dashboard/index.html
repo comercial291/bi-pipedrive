@@ -1973,7 +1973,9 @@ function renderMotivoPerda(deals) {
     destroyChart('chartMotivosBar');
     destroyChart('chartMotivosTrend');
     document.getElementById('tableMotivos').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:#64748b">Sem dados de perda</td></tr>';
-    document.getElementById('kpiCategorias').innerHTML = '';
+    document.getElementById('catBarChart').innerHTML = '<p style="color:#64748b;font-size:13px;padding:16px">Sem dados de perda no período</p>';
+    document.getElementById('insightBlock').innerHTML = '';
+    document.getElementById('alertBlock').innerHTML = '<div class="alert-ok">✅ Nenhuma perda registrada no período</div>';
     return;
   }
 
@@ -2164,10 +2166,11 @@ function showDrill(cat) {
   if (!deals.length) return;
   document.getElementById('drillTitle').textContent = `${cat} — ${deals.length} negócio${deals.length!==1?'s':''} perdido${deals.length!==1?'s':''}`;
   const rows = deals.slice(0,60).map(d => {
-    const user = allUsers.find(u => u.id === (d.user_id?.id || d.user_id));
+    const uid = d.user_id?.id || d.user_id;
+    const userName = allUsers[uid] || '—';
     return `<tr>
       <td>${d.title||'—'}</td>
-      <td>${user?.name||'—'}</td>
+      <td>${userName}</td>
       <td>${d.stage_name||`Etapa ${d.stage_id||'?'}`}</td>
       <td>${(d.close_time||d.lost_time||'').slice(0,10)||'—'}</td>
       <td>${d.lost_reason||'Sem motivo'}</td>
