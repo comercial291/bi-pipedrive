@@ -2256,6 +2256,6 @@ function boot() {
 }
 </script>
 <!-- Chart.js carregado aqui (fim do body) → DOM já parseado, sem bloquear renderização -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" onload="boot()" onerror="document.getElementById('overlayMsg').textContent='Erro ao carregar Chart.js — recarregue a página'"></script>
+<script src="/chart.min.js" onload="boot()" onerror="document.getElementById('overlayMsg').textContent='Erro ao carregar Chart.js — recarregue a página'"></script>
 </body>
 </html>
