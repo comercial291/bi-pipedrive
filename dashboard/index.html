@@ -2129,11 +2129,11 @@ function renderMotivoPerda(deals) {
   // Guardar para drill-down
   window._catDeals = catDeals;
 
-  const sorted = CAT_ORDER.map(c => [c, catCounts[c]]).filter(([,v]) => v > 0)
-                           .sort((a,b) => b[1]-a[1]);
+  const sortedCats = CAT_ORDER.map(c => [c, catCounts[c]]).filter(([,v]) => v > 0)
+                              .sort((a,b) => b[1]-a[1]);
 
   // ── Gráfico de barras horizontais ─────────────────────────────────────
-  const barsHtml = sorted.map(([cat, count], i) => {
+  const barsHtml = sortedCats.map(([cat, count], i) => {
     const pct = (count / total * 100).toFixed(1);
     const isTop = i < 3;
     return `<div class="hbar-item" onclick="showDrill('${cat}')">
@@ -2151,7 +2151,7 @@ function renderMotivoPerda(deals) {
   document.getElementById('catBarChart').innerHTML = barsHtml || '<p style="color:#64748b;font-size:13px">Sem dados</p>';
 
   // ── Bloco de insights ─────────────────────────────────────────────────
-  const top3 = sorted.slice(0,3);
+  const top3 = sortedCats.slice(0,3);
   document.getElementById('insightBlock').innerHTML = `
     <div class="insight-title">💡 Principais causas de perda</div>
     ${top3.map(([cat,count],i)=>`
