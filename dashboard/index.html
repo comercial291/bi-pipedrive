@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 <style>
 :root {
   --bg: #f8f9fa;
@@ -248,6 +248,14 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 <!-- hidden inputs kept for legacy compat -->
 <input type="hidden" id="filterFunil"><input type="hidden" id="filterVendedor">
 <input type="hidden" id="filterDateStart"><input type="hidden" id="filterDateEnd">
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay" style="position:fixed;inset:0;background:rgba(248,249,250,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px">
+  <div style="width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#2563eb;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+  <div style="font-size:15px;font-weight:600;color:#1e3a5f" id="overlayMsg">Conectando ao servidor…</div>
+  <div style="font-size:12px;color:#94a3b8" id="overlaySub">Pode levar até 60s na primeira visita do dia</div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
 <!-- MAIN -->
 <div class="main">
@@ -666,19 +674,36 @@ function matchesPipelineName(pipeName, filter) {
 async function apiGet(path, attempt = 1) {
   const url = '/proxy/' + path;
   try {
-    const resp = await fetch(url);
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 25000);
+    const resp = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(tid);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     return resp.json();
   } catch(e) {
-    if (attempt < 4) {
-      const wait = attempt * 8000;
-      document.getElementById('lastUpdate').textContent =
-        `Servidor acordando… tentativa ${attempt}/3 (aguarde ${wait/1000}s)`;
+    const retryable = e.name === 'AbortError' || (e.message && e.message.includes('503')) ||
+                      e.name === 'TypeError';
+    if (retryable && attempt <= 5) {
+      const wait = [0, 10000, 15000, 20000, 20000, 20000][attempt] || 20000;
+      const secs = wait / 1000;
+      setOverlay(`Servidor acordando… tentativa ${attempt}/5`, `Aguardando ${secs}s antes de tentar novamente`);
       await new Promise(r => setTimeout(r, wait));
       return apiGet(path, attempt + 1);
     }
     throw e;
   }
+}
+
+function setOverlay(msg, sub) {
+  const el = document.getElementById('overlayMsg');
+  const s  = document.getElementById('overlaySub');
+  if (el) el.textContent = msg;
+  if (s)  s.textContent  = sub || '';
+}
+
+function hideOverlay() {
+  const el = document.getElementById('loadingOverlay');
+  if (el) el.style.display = 'none';
 }
 
 async function loadAllDeals() {
@@ -731,9 +756,8 @@ async function loadUsers() {
 async function init() {
   showLoading(true);
   showError('');
-  const setStatus = msg => document.getElementById('lastUpdate').textContent = msg;
+  setOverlay('Carregando dados do Pipedrive…', 'Buscando negócios, usuários e atividades');
   try {
-    setStatus('⏳ Conectando ao servidor…');
     const [pipelines, users, deals, actOpen, actDone] = await Promise.all([
       loadPipelines(),
       loadUsers(),
@@ -765,7 +789,9 @@ async function init() {
 
     renderAll();
     startRefreshTimer();
+    hideOverlay();
   } catch(e) {
+    hideOverlay();
     showError('Erro ao carregar dados: ' + e.message);
     console.error(e);
   }
