@@ -536,7 +536,11 @@ const CONFIG = {
   metaReunioes: 60,
   metaCloserContas: 9,
   metaCloserMRR: 6000,
-  benchmarkConversao: 30
+  benchmarkConversao: 30,
+  // ── Defina aqui quem é Closer e quem é SDR (por nome exato do usuário no Pipedrive)
+  // Se deixar vazio [], a classificação é feita automaticamente pelo pipeline
+  CLOSERS: ['Mauricio de Campos'],
+  SDRS:    ['Erica']
 };
 
 const PIPELINE_NAMES = ['Vendas', 'Pré-vendas', 'Sucesso do Cliente (CS)'];
@@ -1814,13 +1818,14 @@ function renderIndividual(deals) {
   drawGauge('gaugeEmpFat',    wonValue,  mFat,    'gaugeEmpFatPct');
   drawGauge('gaugeEmpContas', wonCount,  mContas, 'gaugeEmpContasPct');
 
-  // Closers — by user for Vendas pipeline
+  // Closers — by user for Vendas pipeline, filtered by CONFIG.CLOSERS if set
   const vendaPipe = allPipelines.find(p => p.name.toLowerCase().includes('vend'));
   const closerDeals = vendaPipe ? deals.filter(d => d.pipeline_id === vendaPipe.id && d.status === 'won') : won;
   const closersByUser = {};
   closerDeals.forEach(d => {
     const uid = d.user_id?.id || d.user_id;
     const name = allUsers[uid] || ('User ' + uid);
+    if (CONFIG.CLOSERS.length && !CONFIG.CLOSERS.some(c => name.toLowerCase().includes(c.toLowerCase()))) return;
     if (!closersByUser[name]) closersByUser[name] = { count: 0, value: 0 };
     closersByUser[name].count++;
     closersByUser[name].value += d.value || 0;
@@ -1864,6 +1869,7 @@ function renderIndividual(deals) {
   sdrDeals.forEach(d => {
     const uid = d.user_id?.id || d.user_id;
     const name = allUsers[uid] || ('User ' + uid);
+    if (CONFIG.SDRS.length && !CONFIG.SDRS.some(s => name.toLowerCase().includes(s.toLowerCase()))) return;
     if (!sdrByUser[name]) sdrByUser[name] = { count: 0 };
     sdrByUser[name].count++;
   });
