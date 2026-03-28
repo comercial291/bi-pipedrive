@@ -18,7 +18,7 @@ def static_files(filename):
 def proxy(endpoint):
     params = dict(request.args)
     params["api_token"] = API_KEY
-    r = requests.get(f"{PIPE_URL}/{endpoint}", params=params, timeout=30)
+    r = requests.get(f"{PIPE_URL}/{endpoint}", params=params, timeout=90)
     return Response(r.content, status=r.status_code, content_type="application/json")
 
 if __name__ == "__main__":

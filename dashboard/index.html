@@ -663,12 +663,22 @@ function matchesPipelineName(pipeName, filter) {
 // ─────────────────────────────────────────────
 // API
 // ─────────────────────────────────────────────
-async function apiGet(path) {
-  const base = '/proxy/';
-  const url = base + path;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`HTTP ${resp.status} for ${path}`);
-  return resp.json();
+async function apiGet(path, attempt = 1) {
+  const url = '/proxy/' + path;
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    return resp.json();
+  } catch(e) {
+    if (attempt < 4) {
+      const wait = attempt * 8000;
+      document.getElementById('lastUpdate').textContent =
+        `Servidor acordando… tentativa ${attempt}/3 (aguarde ${wait/1000}s)`;
+      await new Promise(r => setTimeout(r, wait));
+      return apiGet(path, attempt + 1);
+    }
+    throw e;
+  }
 }
 
 async function loadAllDeals() {
@@ -721,7 +731,9 @@ async function loadUsers() {
 async function init() {
   showLoading(true);
   showError('');
+  const setStatus = msg => document.getElementById('lastUpdate').textContent = msg;
   try {
+    setStatus('⏳ Conectando ao servidor…');
     const [pipelines, users, deals, actOpen, actDone] = await Promise.all([
       loadPipelines(),
       loadUsers(),
