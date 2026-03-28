@@ -146,6 +146,13 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 .pipeline-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .pipeline-tab:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
 
+/* PERIODO BAR */
+.periodo-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.periodo-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: .5px; margin-right: 4px; }
+.periodo-btn { padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; transition: .2s; font-family: inherit; }
+.periodo-btn:hover { border-color: var(--primary); color: var(--primary); }
+.periodo-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
 /* TEAM TOGGLE */
 .team-toggle { display: flex; gap: 6px; margin-bottom: 16px; }
 .team-toggle-btn { padding: 7px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; transition: .2s; font-family: inherit; }
@@ -252,6 +259,16 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
 
     <!-- TAB 0: VISÃO GERAL -->
     <div class="tab-panel active" id="tab-0">
+      <div class="periodo-bar">
+        <span class="periodo-label">PERÍODO:</span>
+        <button class="periodo-btn" onclick="setPeriodo(7,this)">7 dias</button>
+        <button class="periodo-btn" onclick="setPeriodo(30,this)">30 dias</button>
+        <button class="periodo-btn active" id="periodoDefault" onclick="setPeriodo(90,this)">90 dias</button>
+        <button class="periodo-btn" onclick="setPeriodo(180,this)">6 meses</button>
+        <button class="periodo-btn" onclick="setPeriodo(365,this)">1 ano</button>
+        <button class="periodo-btn" onclick="setPeriodoMes(this)">Este mês</button>
+        <button class="periodo-btn" onclick="setPeriodoAno(this)">Este ano</button>
+      </div>
       <div class="kpi-row cols-6" id="kpiRowMain"></div>
 
       <div class="section-group">
@@ -665,6 +682,38 @@ function buildPipelineTabs() {
 function setPipelineTab(activeBtn) {
   document.querySelectorAll('.pipeline-tab').forEach(b => b.classList.remove('active'));
   activeBtn.classList.add('active');
+}
+
+// ─────────────────────────────────────────────
+// PERIODO QUICK BUTTONS
+// ─────────────────────────────────────────────
+function setPeriodo(days, btn) {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(end.getDate() - days);
+  document.getElementById('filterDateStart').value = start.toISOString().slice(0,10);
+  document.getElementById('filterDateEnd').value   = end.toISOString().slice(0,10);
+  document.querySelectorAll('.periodo-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+function setPeriodoMes(btn) {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end   = new Date(now.getFullYear(), now.getMonth()+1, 0);
+  document.getElementById('filterDateStart').value = start.toISOString().slice(0,10);
+  document.getElementById('filterDateEnd').value   = end.toISOString().slice(0,10);
+  document.querySelectorAll('.periodo-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+function setPeriodoAno(btn) {
+  const now = new Date();
+  document.getElementById('filterDateStart').value = `${now.getFullYear()}-01-01`;
+  document.getElementById('filterDateEnd').value   = `${now.getFullYear()}-12-31`;
+  document.querySelectorAll('.periodo-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
 }
 
 // ─────────────────────────────────────────────
