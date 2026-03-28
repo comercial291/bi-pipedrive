@@ -2256,7 +2256,17 @@ function boot() {
 }
 </script>
 <!-- Chart.js carregado aqui (fim do body) → DOM já parseado, sem bloquear renderização -->
-<script src="/chart.min.js"></script>
-<script>boot();</script>
+<script>
+(function(){
+  var done = false;
+  function tryBoot(){ if(!done){ done=true; boot(); } }
+  var s = document.createElement('script');
+  s.src = '/chart.min.js';
+  s.onload = tryBoot;
+  s.onerror = tryBoot;
+  document.body.appendChild(s);
+  setTimeout(tryBoot, 8000); // fallback: dispara boot() em até 8s mesmo sem Chart.js
+})();
+</script>
 </body>
 </html>
