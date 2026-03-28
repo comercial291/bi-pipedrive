@@ -4,192 +4,223 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>BI Comercial – Route Sales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  :root{
-    --bg:#f0f2f7;--sidebar:#0f2440;--sidebar2:#162d52;
-    --accent:#e63946;--green:#2ec4b6;--blue:#4361ee;
-    --purple:#7209b7;--orange:#f4a261;--yellow:#f9c74f;
-    --card:#fff;--text:#1a1a2e;--muted:#6b7280;
-    --border:#e5e7eb;--radius:12px;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+:root {
+  --bg: #f8f9fa;
+  --sidebar: #1a2332;
+  --sidebar2: #243447;
+  --primary: #2563eb;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --radius: 12px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; font-size: 14px; }
 
-  /* ── SIDEBAR ── */
-  .sidebar{width:220px;min-width:220px;background:var(--sidebar);display:flex;flex-direction:column;padding:0 0 20px}
-  .logo{padding:22px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
-  .logo h2{color:#fff;font-size:15px;font-weight:700;letter-spacing:.3px}
-  .logo p{color:#7fa3cc;font-size:11px;margin-top:3px}
-  .filter-group{padding:18px 14px 0}
-  .filter-group label{display:block;color:#7fa3cc;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
-  .filter-group select,.filter-group input{
-    width:100%;background:var(--sidebar2);border:1px solid rgba(255,255,255,.1);
-    color:#fff;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;
-  }
-  .filter-group select option{background:#162d52}
-  .apply-btn{
-    margin:20px 14px 0;width:calc(100% - 28px);background:var(--accent);
-    color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;
-    font-weight:600;cursor:pointer;transition:.2s;
-  }
-  .apply-btn:hover{background:#c1121f}
-  .refresh-badge{margin:14px 14px 0;background:rgba(46,196,182,.15);border:1px solid rgba(46,196,182,.3);
-    border-radius:6px;padding:7px 10px;display:flex;align-items:center;gap:6px}
-  .refresh-badge span{font-size:10px;color:#2ec4b6;font-weight:600}
-  .dot{width:7px;height:7px;border-radius:50%;background:#2ec4b6;animation:pulse 2s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-  .sidebar-footer{margin-top:auto;padding:14px;text-align:center;color:rgba(255,255,255,.25);font-size:10px}
+/* SIDEBAR */
+.sidebar { width: 230px; min-width: 230px; background: var(--sidebar); display: flex; flex-direction: column; padding-bottom: 20px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.sidebar-logo { padding: 24px 18px 18px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.sidebar-logo h2 { color: #fff; font-size: 16px; font-weight: 800; letter-spacing: -.3px; }
+.sidebar-logo p { color: #7fa3cc; font-size: 11px; margin-top: 3px; }
+.filter-section { padding: 18px 16px 0; }
+.filter-label { display: block; color: #7fa3cc; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; margin-top: 14px; }
+.filter-label:first-child { margin-top: 0; }
+.filter-select, .filter-input {
+  width: 100%; background: var(--sidebar2); border: 1px solid rgba(255,255,255,.1);
+  color: #fff; border-radius: 8px; padding: 9px 10px; font-size: 12px; outline: none;
+  font-family: inherit; transition: border-color .2s;
+}
+.filter-select:focus, .filter-input:focus { border-color: var(--primary); }
+.filter-select option { background: #1a2332; }
+.apply-btn {
+  margin: 18px 16px 0; width: calc(100% - 32px); background: var(--primary);
+  color: #fff; border: none; border-radius: 8px; padding: 11px; font-size: 13px;
+  font-weight: 700; cursor: pointer; transition: .2s; font-family: inherit;
+}
+.apply-btn:hover { background: #1d4ed8; }
+.refresh-box { margin: 14px 16px 0; background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.25); border-radius: 8px; padding: 9px 12px; }
+.refresh-box .refresh-label { font-size: 10px; color: #10b981; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; display: flex; align-items: center; gap: 6px; }
+.refresh-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite; }
+.refresh-countdown { font-size: 18px; font-weight: 800; color: #10b981; margin-top: 4px; }
+.refresh-sub { font-size: 10px; color: #7fa3cc; margin-top: 2px; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.35} }
+.sidebar-footer { margin-top: auto; padding: 14px 16px; color: rgba(255,255,255,.2); font-size: 10px; border-top: 1px solid rgba(255,255,255,.06); margin-top: 20px; }
 
-  /* ── MAIN ── */
-  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-  .topbar{background:#fff;border-bottom:1px solid var(--border);padding:14px 28px;
-    display:flex;align-items:center;justify-content:space-between}
-  .topbar h1{font-size:20px;font-weight:700;color:var(--text)}
-  .topbar small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
-  .update-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;
-    padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
-  .update-btn:hover{background:#3451d1}
+/* MAIN */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.topbar h1 { font-size: 20px; font-weight: 800; color: var(--text); }
+.topbar small { display: block; font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.btn-refresh { background: var(--primary); color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: .2s; }
+.btn-refresh:hover { background: #1d4ed8; }
+.loading-bar { height: 3px; background: linear-gradient(90deg, var(--primary) 0%, #60a5fa 50%, var(--primary) 100%); background-size: 200% 100%; animation: shimmer 1.5s infinite; display: none; }
+.loading-bar.show { display: block; }
+@keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
 
-  /* ── ERROR ── */
-  .error-bar{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;
-    padding:10px 18px;font-size:13px;display:none;align-items:center;gap:8px}
-  .error-bar.show{display:flex}
+/* ERROR */
+.error-bar { background: #fef2f2; border-bottom: 1px solid #fca5a5; color: #dc2626; padding: 10px 28px; font-size: 13px; display: none; align-items: center; gap: 8px; }
+.error-bar.show { display: flex; }
 
-  /* ── TABS ── */
-  .tabs{display:flex;gap:4px;padding:16px 28px 0;background:#fff;border-bottom:1px solid var(--border)}
-  .tab-btn{padding:9px 20px;border:none;background:transparent;font-size:13px;
-    font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;
-    margin-bottom:-1px;border-radius:6px 6px 0 0;transition:.2s}
-  .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);background:#eff3ff}
-  .tab-btn:hover:not(.active){color:var(--text);background:#f9fafb}
+/* TABS */
+.tabs { display: flex; gap: 2px; padding: 0 28px; background: #fff; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; }
+.tab-btn { padding: 13px 18px; border: none; background: transparent; font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: .2s; font-family: inherit; }
+.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-btn:hover:not(.active) { color: var(--text); background: #f8f9fa; }
 
-  /* ── CONTENT ── */
-  .content{flex:1;overflow-y:auto;padding:22px 28px}
-  .tab-panel{display:none}
-  .tab-panel.active{display:block}
+/* CONTENT */
+.content { flex: 1; overflow-y: auto; padding: 24px 28px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
 
-  /* ── DATE QUICK FILTERS ── */
-  .date-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
-  .date-bar span{font-size:11px;color:var(--muted);font-weight:600;margin-right:4px}
-  .dq{background:#fff;border:1px solid var(--border);color:var(--muted);border-radius:20px;
-    padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
-  .dq:hover{border-color:var(--blue);color:var(--blue)}
-  .dq.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+/* CARDS */
+.card { background: var(--card); border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 20px; }
 
-  /* ── KPI CARDS ── */
-  .kpi-row{display:grid;gap:14px;margin-bottom:20px}
-  .kpi-row.cols3{grid-template-columns:repeat(3,1fr)}
-  .kpi-row.cols6{grid-template-columns:repeat(6,1fr)}
-  .kcard{background:var(--card);border-radius:var(--radius);padding:18px 20px;
-    border-left:4px solid var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative;overflow:hidden}
-  .kcard.green{border-left-color:var(--green)}
-  .kcard.red{border-left-color:var(--accent)}
-  .kcard.purple{border-left-color:var(--purple)}
-  .kcard.orange{border-left-color:var(--orange)}
-  .kcard.yellow{border-left-color:var(--yellow)}
-  .kcard-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px}
-  .kcard-value{font-size:26px;font-weight:800;color:var(--text);line-height:1}
-  .kcard-sub{font-size:11px;color:var(--muted);margin-top:5px}
+/* KPI ROW */
+.kpi-row { display: grid; gap: 14px; margin-bottom: 20px; }
+.kpi-row.cols-6 { grid-template-columns: repeat(6, 1fr); }
+.kpi-row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.kpi-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.kpi-row.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.kcard { background: var(--card); border-radius: var(--radius); padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08); border-top: 3px solid var(--primary); }
+.kcard.success { border-top-color: var(--success); }
+.kcard.danger { border-top-color: var(--danger); }
+.kcard.warning { border-top-color: var(--warning); }
+.kcard.neutral { border-top-color: var(--text-secondary); }
+.kcard-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--text-secondary); margin-bottom: 8px; }
+.kcard-value { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1.1; }
+.kcard-sub { font-size: 11px; color: var(--text-secondary); margin-top: 5px; }
+.kcard-sub.good { color: var(--success); font-weight: 600; }
+.kcard-sub.bad { color: var(--danger); font-weight: 600; }
 
-  /* ── SECTION HEADER ── */
-  .section-hdr{display:flex;align-items:center;gap:10px;margin:24px 0 14px}
-  .section-hdr .badge{background:var(--green);color:#fff;font-size:11px;font-weight:700;
-    padding:3px 12px;border-radius:20px}
-  .section-hdr .badge.red{background:var(--accent)}
-  .section-hdr .badge.blue{background:var(--blue)}
-  .section-hdr hr{flex:1;border:none;border-top:1px solid var(--border)}
+/* SECTION HEADER */
+.section-hdr { font-size: 15px; font-weight: 700; color: var(--text); margin: 24px 0 14px; display: flex; align-items: center; gap: 10px; }
+.section-hdr::before { content:''; display:inline-block; width:4px; height:18px; background: var(--primary); border-radius: 2px; }
 
-  /* ── CHARTS ── */
-  .chart-card{background:var(--card);border-radius:var(--radius);padding:20px 22px;
-    box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:16px}
-  .chart-card h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:16px;
-    display:flex;align-items:center;gap:8px}
-  .chart-card h3 .icon{font-size:16px}
-  .chart-wrap{position:relative}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+/* CHART CONTAINERS */
+.chart-row { display: grid; gap: 16px; margin-bottom: 20px; }
+.chart-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.chart-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.chart-box { background: var(--card); border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 20px; }
+.chart-box-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.chart-box-sub { font-size: 11px; color: var(--text-secondary); margin-bottom: 16px; }
+.chart-meta { display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+.chart-meta-item { font-size: 11px; color: var(--text-secondary); }
+.chart-meta-item strong { color: var(--text); font-weight: 700; }
+.chart-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.chart-input-label { font-size: 11px; color: var(--text-secondary); font-weight: 600; }
+.chart-input { border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; font-size: 12px; font-family: inherit; color: var(--text); width: 90px; }
+.chart-canvas-wrap { position: relative; }
 
-  /* ── FUNNEL CANVAS ── */
-  #funnel-canvas{width:100%;display:block}
+/* TABLES */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th { text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--text-secondary); border-bottom: 2px solid var(--border); }
+.data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: #f8f9fa; }
+.badge-green { color: var(--success); font-weight: 700; }
+.badge-red { color: var(--danger); font-weight: 700; }
+.badge-warn { color: var(--warning); font-weight: 700; }
+.pct-bar { height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; width: 80px; display: inline-block; vertical-align: middle; margin-left: 8px; }
+.pct-bar-fill { height: 100%; border-radius: 3px; }
 
-  /* ── FUNIL FILTERS ── */
-  .funil-filter-bar{display:flex;align-items:center;gap:12px;background:#fff;
-    border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;
-    box-shadow:0 1px 4px rgba(0,0,0,.06)}
-  .funil-filter-bar label{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
-  .funil-filter-bar select{flex:1;border:1px solid var(--border);border-radius:8px;
-    padding:7px 12px;font-size:13px;color:var(--text);background:#fff;outline:none}
+/* FUNNEL */
+.funnel-layout { display: grid; grid-template-columns: 1fr 280px; gap: 20px; margin-bottom: 20px; }
+.funnel-side { display: flex; flex-direction: column; gap: 14px; }
+.funnel-stat { background: var(--card); border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 16px 18px; }
+.funnel-stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--text-secondary); margin-bottom: 6px; }
+.funnel-stat-value { font-size: 22px; font-weight: 800; color: var(--text); }
 
-  /* ── TABLE ── */
-  .table-card{background:var(--card);border-radius:var(--radius);
-    box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden;margin-bottom:16px}
-  table{width:100%;border-collapse:collapse}
-  th{background:#f8fafc;font-size:10px;font-weight:700;text-transform:uppercase;
-    letter-spacing:.6px;color:var(--muted);padding:10px 16px;text-align:left;
-    border-bottom:1px solid var(--border)}
-  td{padding:11px 16px;font-size:13px;border-bottom:1px solid #f3f4f6}
-  tr:last-child td{border-bottom:none}
-  tr:hover td{background:#fafbff}
-  .bar-mini{height:6px;border-radius:3px;background:var(--blue);display:inline-block;min-width:2px}
-  .bar-mini.green{background:var(--green)}
-  .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
-  .tag.g{background:#d1fae5;color:#065f46}
-  .tag.r{background:#fee2e2;color:#991b1b}
-  .tag.b{background:#eff3ff;color:#3451d1}
+/* PIPELINE TABS */
+.pipeline-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.pipeline-tab { padding: 8px 18px; border-radius: 20px; border: 2px solid var(--border); background: var(--card); color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; transition: .2s; font-family: inherit; }
+.pipeline-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.pipeline-tab:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
 
-  /* ── EQUIPE TABLE ── */
-  .avatar{width:28px;height:28px;border-radius:50%;background:var(--blue);
-    color:#fff;font-size:11px;font-weight:700;display:inline-flex;
-    align-items:center;justify-content:center;margin-right:8px;vertical-align:middle}
+/* TEAM TOGGLE */
+.team-toggle { display: flex; gap: 6px; margin-bottom: 16px; }
+.team-toggle-btn { padding: 7px 16px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; transition: .2s; font-family: inherit; }
+.team-toggle-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-  /* ── LOADING ── */
-  .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.8);
-    z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-  .spinner{width:40px;height:40px;border:4px solid #e5e7eb;border-top-color:var(--blue);
-    border-radius:50%;animation:spin .8s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .loading-overlay p{font-size:14px;font-weight:600;color:var(--muted)}
-  .loading-overlay.hidden{display:none}
+/* GAUGE SECTION */
+.gauge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.gauge-card { background: var(--card); border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 20px; text-align: center; }
+.gauge-title { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px; }
+.gauge-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+.gauge-canvas-wrap { display: flex; justify-content: center; position: relative; }
+.gauge-center-text { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; }
+.gauge-pct { font-size: 22px; font-weight: 800; color: var(--text); }
+.gauge-pct-sub { font-size: 10px; color: var(--text-secondary); }
+.gauge-bottom { margin-top: 10px; font-size: 12px; color: var(--text-secondary); }
+.gauge-bottom strong { color: var(--text); }
 
-  /* RESPONSIVE */
-  @media(max-width:900px){
-    .kpi-row.cols6{grid-template-columns:repeat(2,1fr)}
-    .grid2,.grid3{grid-template-columns:1fr}
-    .sidebar{width:180px;min-width:180px}
-  }
+/* FORECAST */
+.forecast-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+.fcard { background: var(--card); border-radius: var(--radius); box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 18px; }
+.fcard-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .7px; color: var(--text-secondary); margin-bottom: 6px; }
+.fcard-value { font-size: 22px; font-weight: 800; color: var(--text); }
+.fcard-sub { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 48px 20px; color: var(--text-secondary); }
+.empty-state p { font-size: 14px; font-weight: 500; }
+
+/* SECTION GROUP */
+.section-group { margin-bottom: 28px; }
+
+/* RESPONSIVE */
+@media (max-width: 1200px) {
+  .kpi-row.cols-6 { grid-template-columns: repeat(3, 1fr); }
+  .kpi-row.cols-4 { grid-template-columns: repeat(2, 1fr); }
+  .forecast-row { grid-template-columns: repeat(2, 1fr); }
+  .funnel-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .sidebar { width: 200px; min-width: 200px; }
+  .chart-row.cols-2 { grid-template-columns: 1fr; }
+  .kpi-row.cols-6 { grid-template-columns: repeat(2, 1fr); }
+}
 </style>
 </head>
 <body>
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
-  <div class="logo">
-    <h2>BI Comercial</h2>
-    <p>Route Sales × Pipedrive</p>
+  <div class="sidebar-logo">
+    <h2>Route Sales BI</h2>
+    <p>Painel Comercial</p>
   </div>
-
-  <div class="filter-group" style="margin-top:10px">
-    <label>Funil</label>
-    <select id="f-pipeline"><option value="">Todos os funis</option></select>
+  <div class="filter-section">
+    <label class="filter-label">Funil</label>
+    <select class="filter-select" id="filterFunil">
+      <option value="">Todos os funis</option>
+      <option value="Vendas">Vendas</option>
+      <option value="Pré-vendas">Pré-vendas</option>
+      <option value="Sucesso do Cliente (CS)">Sucesso do Cliente (CS)</option>
+    </select>
+    <label class="filter-label">Vendedor</label>
+    <select class="filter-select" id="filterVendedor">
+      <option value="">Todos os vendedores</option>
+    </select>
+    <label class="filter-label">Data Inicial</label>
+    <input type="date" class="filter-input" id="filterDateStart"/>
+    <label class="filter-label">Data Final</label>
+    <input type="date" class="filter-input" id="filterDateEnd"/>
   </div>
-  <div class="filter-group" style="margin-top:12px">
-    <label>Vendedor</label>
-    <select id="f-user"><option value="">Todos</option></select>
-  </div>
-  <div class="filter-group" style="margin-top:12px">
-    <label>Data Inicial</label>
-    <input type="date" id="f-start"/>
-  </div>
-  <div class="filter-group" style="margin-top:10px">
-    <label>Data Final</label>
-    <input type="date" id="f-end"/>
-  </div>
-  <button class="apply-btn" onclick="applyFilters()">Aplicar filtros</button>
-
-  <div class="refresh-badge">
-    <div class="dot"></div>
-    <span id="refresh-label">Auto-refresh: 2:00:00</span>
+  <button class="apply-btn" onclick="applyFilters()">Aplicar Filtros</button>
+  <div class="refresh-box">
+    <div class="refresh-label"><span class="refresh-dot"></span> Auto-refresh</div>
+    <div class="refresh-countdown" id="refreshCountdown">2:00:00</div>
+    <div class="refresh-sub">próxima atualização</div>
   </div>
   <div class="sidebar-footer">Route Sales © 2026</div>
 </aside>
@@ -199,634 +230,1706 @@
   <div class="topbar">
     <div>
       <h1>Dashboard Comercial</h1>
-      <small id="last-update">—</small>
+      <small id="lastUpdate">Carregando dados…</small>
     </div>
-    <button class="update-btn" onclick="loadAll()">↻ Atualizar agora</button>
+    <div class="topbar-actions">
+      <button class="btn-refresh" onclick="forceRefresh()">↺ Atualizar</button>
+    </div>
   </div>
+  <div class="loading-bar" id="loadingBar"></div>
+  <div class="error-bar" id="errorBar">⚠ <span id="errorMsg"></span></div>
 
-  <div class="error-bar" id="err-bar">
-    <span>⚠</span><span id="err-msg"></span>
-    <button onclick="document.getElementById('err-bar').classList.remove('show')"
-      style="margin-left:auto;background:none;border:none;cursor:pointer;color:#dc2626;font-size:16px">×</button>
-  </div>
-
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="visao">Visão Geral</button>
-    <button class="tab-btn" data-tab="funil">Funil</button>
-    <button class="tab-btn" data-tab="equipe">Equipe</button>
-    <button class="tab-btn" data-tab="perdas">Motivos de Perda</button>
+  <div class="tabs" id="tabsBar">
+    <button class="tab-btn active" onclick="switchTab(0)">Visão Geral</button>
+    <button class="tab-btn" onclick="switchTab(1)">Funil</button>
+    <button class="tab-btn" onclick="switchTab(2)">Equipe</button>
+    <button class="tab-btn" onclick="switchTab(3)">Atividades</button>
+    <button class="tab-btn" onclick="switchTab(4)">Individual</button>
+    <button class="tab-btn" onclick="switchTab(5)">Motivos de Perda</button>
   </div>
 
   <div class="content">
 
-    <!-- ═══════════════════ VISÃO GERAL ═══════════════════ -->
-    <div class="tab-panel active" id="tab-visao">
+    <!-- TAB 0: VISÃO GERAL -->
+    <div class="tab-panel active" id="tab-0">
+      <div class="kpi-row cols-6" id="kpiRowMain"></div>
 
-      <!-- Quick date filters -->
-      <div class="date-bar">
-        <span>PERÍODO:</span>
-        <button class="dq" data-days="7">7 dias</button>
-        <button class="dq" data-days="30">30 dias</button>
-        <button class="dq active" data-days="90">90 dias</button>
-        <button class="dq" data-days="180">6 meses</button>
-        <button class="dq" data-days="365">1 ano</button>
-        <button class="dq" data-month="cur">Este mês</button>
-        <button class="dq" data-year="cur">Este ano</button>
+      <div class="section-group">
+        <div class="section-hdr">Resultados do Período</div>
+        <div class="kpi-row cols-3" id="kpiRowResults"></div>
       </div>
 
-      <!-- KPIs gerais -->
-      <div class="kpi-row cols3">
-        <div class="kcard blue">
-          <div class="kcard-label">Total de Leads</div>
-          <div class="kcard-value" id="k-total">—</div>
-          <div class="kcard-sub">Criados no período</div>
-        </div>
-        <div class="kcard purple">
-          <div class="kcard-label">Taxa de Conversão</div>
-          <div class="kcard-value" id="k-conv">—</div>
-          <div class="kcard-sub">Ganhos / Total criados</div>
-        </div>
-        <div class="kcard orange">
-          <div class="kcard-label">Em Aberto</div>
-          <div class="kcard-value" id="k-open">—</div>
-          <div class="kcard-sub">Pipeline ativo</div>
+      <div class="section-group">
+        <div class="section-hdr">Ganhos por Mês</div>
+        <div class="chart-box">
+          <div class="chart-input-row">
+            <span class="chart-input-label">Meta mensal (negócios):</span>
+            <input type="number" class="chart-input" id="metaGanhosCount" value="30" onchange="reRenderGanhosChart()"/>
+          </div>
+          <div class="chart-meta" id="ganhosChartMeta"></div>
+          <div class="chart-canvas-wrap" style="height:280px"><canvas id="chartGanhosCount"></canvas></div>
         </div>
       </div>
 
-      <!-- GANHOS -->
-      <div class="section-hdr">
-        <div class="badge">✔ Ganhos</div><hr/>
-      </div>
-      <div class="kpi-row cols3">
-        <div class="kcard green">
-          <div class="kcard-label">Negócios Ganhos</div>
-          <div class="kcard-value" id="k-won">—</div>
-          <div class="kcard-sub">Fechamentos</div>
-        </div>
-        <div class="kcard green">
-          <div class="kcard-label">Valor Ganho</div>
-          <div class="kcard-value" id="k-val">—</div>
-          <div class="kcard-sub">Receita fechada</div>
-        </div>
-        <div class="kcard green">
-          <div class="kcard-label">Ticket Médio</div>
-          <div class="kcard-value" id="k-ticket">—</div>
-          <div class="kcard-sub">Por negócio ganho</div>
-        </div>
-      </div>
-      <div class="grid2">
-        <div class="chart-card">
-          <h3><span class="icon">📈</span>Ganhos por Mês</h3>
-          <div class="chart-wrap"><canvas id="ch-won" height="180"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <h3><span class="icon">💰</span>Valor Ganho por Mês (R$)</h3>
-          <div class="chart-wrap"><canvas id="ch-val" height="180"></canvas></div>
+      <div class="section-group">
+        <div class="section-hdr">Valor Ganho por Mês (R$)</div>
+        <div class="chart-box">
+          <div class="chart-input-row">
+            <span class="chart-input-label">Meta mensal (R$):</span>
+            <input type="number" class="chart-input" id="metaGanhosValue" value="6000" onchange="reRenderValorChart()"/>
+          </div>
+          <div class="chart-meta" id="valorChartMeta"></div>
+          <div class="chart-canvas-wrap" style="height:280px"><canvas id="chartGanhosValue"></canvas></div>
         </div>
       </div>
 
-      <!-- PERDAS -->
-      <div class="section-hdr">
-        <div class="badge red">✖ Perdas</div><hr/>
-      </div>
-      <div class="kpi-row cols3">
-        <div class="kcard red">
-          <div class="kcard-label">Negócios Perdidos</div>
-          <div class="kcard-value" id="k-lost">—</div>
-          <div class="kcard-sub">Oportunidades perdidas</div>
-        </div>
-        <div class="kcard red">
-          <div class="kcard-label">Taxa de Perda</div>
-          <div class="kcard-value" id="k-loss-rate">—</div>
-          <div class="kcard-sub">Perdidos / Total criados</div>
-        </div>
-        <div class="kcard yellow">
-          <div class="kcard-label">Tempo Médio p/ Fechar</div>
-          <div class="kcard-value" id="k-cycle">—</div>
-          <div class="kcard-sub">Dias até fechar/perder</div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <h3><span class="icon">📊</span>Leads por Mês – Criados, Ganhos e Perdidos</h3>
-        <div class="chart-wrap"><canvas id="ch-monthly" height="160"></canvas></div>
-      </div>
-    </div>
-
-    <!-- ═══════════════════ FUNIL ═══════════════════ -->
-    <div class="tab-panel" id="tab-funil">
-
-      <div class="funil-filter-bar">
-        <label>🔽 FUNIL:</label>
-        <select id="f2-pipeline" onchange="onFunilChange()">
-          <option value="">Todos os funis</option>
-        </select>
-      </div>
-
-      <div class="grid2">
-        <div class="chart-card">
-          <h3><span class="icon">🔻</span>Funil de Vendas</h3>
-          <canvas id="funnel-canvas" height="300"></canvas>
-        </div>
-        <div class="chart-card">
-          <h3><span class="icon">📊</span>Taxa de Conversão por Etapa (%)</h3>
-          <div class="chart-wrap"><canvas id="ch-conv" height="300"></canvas></div>
+      <div class="section-group">
+        <div class="section-hdr">Leads por Mês — Topo de Funil</div>
+        <div class="chart-box">
+          <div class="chart-canvas-wrap" style="height:240px"><canvas id="chartLeadsTop"></canvas></div>
         </div>
       </div>
 
-      <div class="table-card">
-        <table>
-          <thead>
-            <tr>
-              <th>Etapa</th>
-              <th>Total</th>
-              <th>Ganhos</th>
-              <th>Perdidos</th>
-              <th>Em Aberto</th>
-              <th>Conversão</th>
-              <th>Distribuição</th>
-            </tr>
-          </thead>
-          <tbody id="stage-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ═══════════════════ EQUIPE ═══════════════════ -->
-    <div class="tab-panel" id="tab-equipe">
-      <div class="chart-card">
-        <h3><span class="icon">👥</span>Performance por Vendedor</h3>
-        <div class="chart-wrap"><canvas id="ch-team" height="220"></canvas></div>
-      </div>
-      <div class="table-card">
-        <table>
-          <thead>
-            <tr>
-              <th>Vendedor</th>
-              <th>Leads</th>
-              <th>Ganhos</th>
-              <th>Perdidos</th>
-              <th>Em Aberto</th>
-              <th>Conversão</th>
-              <th>Valor Ganho</th>
-            </tr>
-          </thead>
-          <tbody id="team-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ═══════════════════ MOTIVOS DE PERDA ═══════════════════ -->
-    <div class="tab-panel" id="tab-perdas">
-      <div class="grid2">
-        <div class="chart-card">
-          <h3><span class="icon">🥧</span>Motivos de Perda</h3>
-          <div class="chart-wrap"><canvas id="ch-reasons" height="280"></canvas></div>
+      <div class="section-group">
+        <div class="section-hdr">Leads por Mês — Resultado (Ganhos vs Perdidos)</div>
+        <div class="chart-box">
+          <div class="chart-canvas-wrap" style="height:260px"><canvas id="chartLeadsResult"></canvas></div>
         </div>
-        <div class="chart-card" style="display:flex;flex-direction:column;justify-content:center">
-          <h3><span class="icon">📋</span>Detalhamento</h3>
-          <div id="reasons-list" style="margin-top:8px"></div>
+      </div>
+
+      <div class="section-group">
+        <div class="section-hdr">Forecast & Previsão de Receita</div>
+        <div class="forecast-row" id="forecastRow"></div>
+        <div class="chart-row cols-2">
+          <div class="chart-box">
+            <div class="chart-box-title">Pipeline de Oportunidades</div>
+            <div class="chart-box-sub">Volume e valor por etapa (em aberto)</div>
+            <div class="chart-canvas-wrap" style="height:220px"><canvas id="chartPipelineOpen"></canvas></div>
+          </div>
+          <div class="chart-box">
+            <div class="chart-box-title">Deals Parados (+30 dias)</div>
+            <div class="chart-box-sub">Negócios sem atualização por vendedor</div>
+            <div class="chart-canvas-wrap" style="height:220px"><canvas id="chartStalled"></canvas></div>
+          </div>
         </div>
       </div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /main -->
+    <!-- TAB 1: FUNIL -->
+    <div class="tab-panel" id="tab-1">
+      <div class="pipeline-tabs" id="pipelineTabs"></div>
+      <div class="funnel-layout">
+        <div>
+          <div class="chart-box" style="padding:0;overflow:hidden">
+            <canvas id="funnelCanvas" height="420"></canvas>
+          </div>
+        </div>
+        <div class="funnel-side" id="funnelSide"></div>
+      </div>
+      <div class="section-group">
+        <div class="section-hdr">Conversão por Etapa</div>
+        <div class="chart-box">
+          <div class="chart-canvas-wrap" style="height:280px"><canvas id="chartFunnelConv"></canvas></div>
+        </div>
+      </div>
+      <div class="section-group">
+        <div class="section-hdr">Tabela Detalhada por Etapa</div>
+        <div class="card" style="overflow-x:auto"><table class="data-table" id="tableFunnel"></table></div>
+      </div>
+    </div>
 
-<!-- LOADING -->
-<div class="loading-overlay" id="loading">
-  <div class="spinner"></div>
-  <p id="loading-msg">Carregando dados…</p>
-</div>
+    <!-- TAB 2: EQUIPE -->
+    <div class="tab-panel" id="tab-2">
+      <div class="team-toggle" id="teamToggle">
+        <button class="team-toggle-btn active" onclick="setTeamMetric('receita',this)">Receita</button>
+        <button class="team-toggle-btn" onclick="setTeamMetric('conversao',this)">Conversão</button>
+        <button class="team-toggle-btn" onclick="setTeamMetric('volume',this)">Volume</button>
+      </div>
+      <div class="chart-box" style="margin-bottom:20px">
+        <div class="chart-canvas-wrap" style="height:300px"><canvas id="chartEquipe"></canvas></div>
+      </div>
+      <div class="section-hdr">Performance Detalhada</div>
+      <div class="card" style="overflow-x:auto"><table class="data-table" id="tableEquipe"></table></div>
+    </div>
+
+    <!-- TAB 3: ATIVIDADES -->
+    <div class="tab-panel" id="tab-3">
+      <div class="kpi-row cols-6" id="kpiAtividades"></div>
+      <div class="section-group">
+        <div class="section-hdr">Atividades por Vendedor</div>
+        <div class="chart-box">
+          <div class="chart-canvas-wrap" style="height:280px"><canvas id="chartAtivVendedor"></canvas></div>
+        </div>
+      </div>
+      <div class="section-group">
+        <div class="section-hdr">Evolução Temporal</div>
+        <div class="chart-box">
+          <div class="chart-canvas-wrap" style="height:240px"><canvas id="chartAtivTemporal"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: INDIVIDUAL -->
+    <div class="tab-panel" id="tab-4">
+      <div class="section-hdr">Metas da Empresa</div>
+      <div class="gauge-grid" id="gaugesEmpresa"></div>
+
+      <div class="section-hdr">Closers — Metas Individuais</div>
+      <div class="gauge-grid" id="gaugesClosers"></div>
+
+      <div class="section-hdr">SDR — Metas Individuais</div>
+      <div class="gauge-grid" id="gaugesSDR"></div>
+    </div>
+
+    <!-- TAB 5: MOTIVOS DE PERDA -->
+    <div class="tab-panel" id="tab-5">
+      <div class="kpi-row cols-3" id="kpiMotivos"></div>
+      <div class="chart-row cols-2">
+        <div class="chart-box">
+          <div class="chart-box-title">Top 7 Motivos de Perda</div>
+          <div class="chart-canvas-wrap" style="height:320px"><canvas id="chartMotivosBar"></canvas></div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-box-title">Tendência por Motivo (meses)</div>
+          <div class="chart-canvas-wrap" style="height:320px"><canvas id="chartMotivosTrend"></canvas></div>
+        </div>
+      </div>
+      <div class="section-group">
+        <div class="section-hdr">Tabela Analítica</div>
+        <div class="card" style="overflow-x:auto"><table class="data-table" id="tableMotivos"></table></div>
+      </div>
+      <div class="section-group">
+        <div class="section-hdr">Categorização Automática</div>
+        <div class="kpi-row cols-3" id="kpiCategorias"></div>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+</div><!-- end main -->
 
 <script>
-// ─── STATE ────────────────────────────────────────────────────────────────────
-const S = {
-  deals: [], pipelines: [], users: [], stages: [],
-  stageMap: {}, pipeMap: {}, userMap: {},
-  filters: { pipeline:'', user:'', start:'', end:'' }
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const CONFIG = {
+  metaGanhosCount: 30,
+  metaGanhosValue: 6000,
+  metaFaturamento: 12000,
+  metaNovasContas: 18,
+  metaReunioes: 60,
+  metaCloserContas: 9,
+  metaCloserMRR: 6000,
+  benchmarkConversao: 30
 };
-let charts = {};
-let refreshTimer, refreshSec = 7200;
 
-// ─── UTILS ───────────────────────────────────────────────────────────────────
-const api = path => fetch('/proxy/'+path).then(r=>r.json());
-const $ = id => document.getElementById(id);
-const fmt = n => n >= 1e6 ? 'R$'+(n/1e6).toFixed(1)+'M'
-              : n >= 1e3 ? 'R$'+(n/1e3).toFixed(0)+'k'
-              : 'R$'+n.toFixed(0);
-const pct = (a,b) => b>0 ? (a/b*100).toFixed(1)+'%' : '0%';
-function mkChart(id,cfg){ if(charts[id])charts[id].destroy(); charts[id]=new Chart($(id),cfg); }
+const PIPELINE_NAMES = ['Vendas', 'Pré-vendas', 'Sucesso do Cliente (CS)'];
 
-// ─── DATES ───────────────────────────────────────────────────────────────────
-function setDates(start, end){
-  $('f-start').value = start.toISOString().slice(0,10);
-  $('f-end').value   = end.toISOString().slice(0,10);
-  S.filters.start    = $('f-start').value;
-  S.filters.end      = $('f-end').value;
+const LOSS_CATEGORIES = {
+  'Processo': ['processo', 'demora', 'burocracia', 'prazo', 'lento'],
+  'Qualificação': ['qualific', 'perfil', 'fit', 'não é o perfil', 'fora do perfil'],
+  'Oferta': ['preço', 'valor', 'caro', 'orçamento', 'budget', 'custo'],
+  'Concorrência': ['concorr', 'competitor', 'outro fornecedor', 'outra empresa'],
+  'Outros': []
+};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let allDeals = [];
+let allActivities = [];
+let allActivitiesDone = [];
+let allStages = {};
+let allUsers = {};
+let allPipelines = [];
+let currentFilters = { pipeline: '', user: '', dateStart: '', dateEnd: '' };
+let activeTab = 0;
+let teamMetric = 'receita';
+let activePipelineTab = '';
+let chartsRegistry = {};
+let refreshInterval = null;
+let refreshSeconds = 7200;
+let refreshTimer = null;
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+function fmtCurrency(val) {
+  if (val == null || isNaN(val)) return 'R$ 0';
+  if (Math.abs(val) >= 1000000) return 'R$ ' + (val/1000000).toFixed(1) + 'M';
+  if (Math.abs(val) >= 1000) return 'R$ ' + (val/1000).toFixed(0) + 'k';
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 }
-function applyQuickDate(btn){
-  document.querySelectorAll('.dq').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+function fmtCurrencyFull(val) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
+}
+function fmtPct(val) { return (val || 0).toFixed(1) + '%'; }
+function fmtNum(val) { return (val || 0).toLocaleString('pt-BR'); }
+function fmtDate(d) { if (!d) return '—'; const dt = new Date(d); return dt.toLocaleDateString('pt-BR'); }
+
+function daysBetween(a, b) {
+  if (!a || !b) return null;
+  const d1 = new Date(a), d2 = new Date(b);
+  return Math.round(Math.abs(d2 - d1) / 86400000);
+}
+
+function getMonthKey(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+function getMonthLabel(key) {
+  if (!key) return '';
+  const [y, m] = key.split('-');
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return months[parseInt(m)-1] + '/' + y.slice(2);
+}
+
+function lastNMonthKeys(n) {
+  const keys = [];
   const now = new Date();
-  if(btn.dataset.days){ setDates(new Date(now - btn.dataset.days*864e5), now); }
-  else if(btn.dataset.month){ setDates(new Date(now.getFullYear(),now.getMonth(),1), now); }
-  else if(btn.dataset.year){ setDates(new Date(now.getFullYear(),0,1), now); }
-  loadAll();
-}
-document.querySelectorAll('.dq').forEach(b => b.addEventListener('click', ()=>applyQuickDate(b)));
-
-// ─── LOADING / ERROR ──────────────────────────────────────────────────────────
-function showLoad(msg){ $('loading-msg').textContent=msg||'Carregando…'; $('loading').classList.remove('hidden'); }
-function hideLoad(){ $('loading').classList.add('hidden'); }
-function showErr(msg){ $('err-msg').textContent=msg; $('err-bar').classList.add('show'); }
-function hideErr(){ $('err-bar').classList.remove('show'); }
-
-// ─── TABS ─────────────────────────────────────────────────────────────────────
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    $('tab-'+btn.dataset.tab).classList.add('active');
-    if(btn.dataset.tab==='funil') renderFunil();
-  });
-});
-
-// ─── LOAD FILTERS (pipelines + users + stages) ────────────────────────────────
-async function loadFilters(){
-  const [pRes, uRes, sRes] = await Promise.all([
-    api('pipelines?limit=100'),
-    api('users?limit=100'),
-    api('stages?limit=500')
-  ]);
-  // pipelines
-  S.pipelines = (pRes.data||[]);
-  S.pipeMap   = {};
-  ['f-pipeline','f2-pipeline'].forEach(id=>{
-    const sel = $(id); sel.innerHTML='<option value="">Todos os funis</option>';
-    S.pipelines.forEach(p=>{
-      S.pipeMap[p.id]=p.name;
-      sel.innerHTML += `<option value="${p.id}">${p.name}</option>`;
-    });
-  });
-  // users
-  S.users = (uRes.data||[]).filter(u=>u.active_flag);
-  S.userMap = {};
-  const uSel = $('f-user'); uSel.innerHTML='<option value="">Todos</option>';
-  S.users.forEach(u=>{ S.userMap[u.id]=u.name; uSel.innerHTML+=`<option value="${u.id}">${u.name}</option>`; });
-  // stages
-  S.stages = (sRes.data||[]);
-  S.stageMap = {};
-  S.stages.forEach(s=>{ S.stageMap[s.id]={name:s.name, pipeline:s.pipeline_id, order:s.order_nr||0}; });
-}
-
-// ─── FETCH ALL DEALS ─────────────────────────────────────────────────────────
-async function fetchDeals(){
-  let all=[], start=0, limit=500;
-  while(true){
-    const r = await api(`deals?status=all_not_deleted&start=${start}&limit=${limit}`);
-    if(!r.success) throw new Error(r.error||'Erro ao buscar deals');
-    const data = r.data||[];
-    all = all.concat(data);
-    if(!r.additional_data?.pagination?.more_items_in_collection) break;
-    start += limit;
-    showLoad(`Carregando negócios… (${all.length})`);
+  for (let i = n-1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    keys.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
   }
-  return all;
+  return keys;
 }
 
-// ─── FILTER DEALS ────────────────────────────────────────────────────────────
-function filterDeals(){
-  const {pipeline, user, start, end} = S.filters;
-  const sd = start ? new Date(start) : null;
-  const ed = end   ? new Date(end+'T23:59:59') : null;
-  return S.deals.filter(d=>{
-    if(pipeline && String(d.pipeline_id)!==String(pipeline)) return false;
-    if(user && String(d.user_id?.id||d.user_id)!==String(user)) return false;
-    const dt = new Date(d.add_time||d.update_time);
-    if(sd && dt < sd) return false;
-    if(ed && dt > ed) return false;
+function linearRegression(arr) {
+  const n = arr.length;
+  if (n < 2) return arr.map(() => 0);
+  const xMean = (n - 1) / 2;
+  const yMean = arr.reduce((a, b) => a + b, 0) / n;
+  let num = 0, den = 0;
+  for (let i = 0; i < n; i++) {
+    num += (i - xMean) * (arr[i] - yMean);
+    den += (i - xMean) ** 2;
+  }
+  const slope = den ? num / den : 0;
+  const intercept = yMean - slope * xMean;
+  return arr.map((_, i) => Math.max(0, +(intercept + slope * i).toFixed(1)));
+}
+
+function destroyChart(id) {
+  if (chartsRegistry[id]) { chartsRegistry[id].destroy(); delete chartsRegistry[id]; }
+}
+
+function showLoading(show) {
+  document.getElementById('loadingBar').classList.toggle('show', show);
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorBar');
+  if (msg) { document.getElementById('errorMsg').textContent = msg; el.classList.add('show'); }
+  else { el.classList.remove('show'); }
+}
+
+function matchesPipelineName(pipeName, filter) {
+  if (!filter) return true;
+  const pn = (pipeName || '').toLowerCase();
+  const f = filter.toLowerCase();
+  if (f === 'pré-vendas') return pn.includes('pré') || pn.includes('pre') || pn.includes('sdr');
+  if (f === 'sucesso do cliente (cs)') return pn.includes('sucesso') || pn.includes('cs') || pn.includes('customer');
+  return pn.includes(f);
+}
+
+// ─────────────────────────────────────────────
+// API
+// ─────────────────────────────────────────────
+async function apiGet(path) {
+  const base = '/proxy/';
+  const url = base + path;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status} for ${path}`);
+  return resp.json();
+}
+
+async function loadAllDeals() {
+  let start = 0;
+  const limit = 500;
+  let results = [];
+  while (true) {
+    const data = await apiGet(`deals?status=all_not_deleted&start=${start}&limit=${limit}`);
+    if (data.data && Array.isArray(data.data)) results = results.concat(data.data);
+    const more = data.additional_data?.pagination?.more_items_in_collection;
+    if (!more) break;
+    start += limit;
+  }
+  return results;
+}
+
+async function loadAllActivities(done) {
+  let start = 0;
+  const limit = 500;
+  let results = [];
+  const doneParam = done ? '1' : '0';
+  while (true) {
+    const data = await apiGet(`activities?start=${start}&limit=${limit}&done=${doneParam}`);
+    if (data.data && Array.isArray(data.data)) results = results.concat(data.data);
+    const more = data.additional_data?.pagination?.more_items_in_collection;
+    if (!more) break;
+    start += limit;
+  }
+  return results;
+}
+
+async function loadPipelines() {
+  const data = await apiGet('pipelines');
+  return data.data || [];
+}
+
+async function loadStages(pipelineId) {
+  const data = await apiGet(`stages?pipeline_id=${pipelineId}`);
+  return data.data || [];
+}
+
+async function loadUsers() {
+  const data = await apiGet('users');
+  return data.data || [];
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+async function init() {
+  showLoading(true);
+  showError('');
+  try {
+    const [pipelines, users, deals, actOpen, actDone] = await Promise.all([
+      loadPipelines(),
+      loadUsers(),
+      loadAllDeals(),
+      loadAllActivities(false),
+      loadAllActivities(true)
+    ]);
+
+    allPipelines = pipelines;
+    allUsers = {};
+    users.forEach(u => { allUsers[u.id] = u.name; });
+
+    // Load stages for all pipelines
+    allStages = {};
+    await Promise.all(pipelines.map(async (p) => {
+      const stages = await loadStages(p.id);
+      stages.forEach(s => { allStages[s.id] = { name: s.name, pipeline_id: p.id, pipeline_name: p.name, order: s.order_nr }; });
+    }));
+
+    allDeals = deals;
+    allActivities = actOpen;
+    allActivitiesDone = actDone;
+
+    populateVendedorFilter(users);
+    buildPipelineTabs();
+
+    const now = new Date();
+    document.getElementById('lastUpdate').textContent = 'Atualizado em ' + now.toLocaleTimeString('pt-BR');
+
+    renderAll();
+    startRefreshTimer();
+  } catch(e) {
+    showError('Erro ao carregar dados: ' + e.message);
+    console.error(e);
+  }
+  showLoading(false);
+}
+
+function populateVendedorFilter(users) {
+  const sel = document.getElementById('filterVendedor');
+  sel.innerHTML = '<option value="">Todos os vendedores</option>';
+  users.sort((a, b) => a.name.localeCompare(b.name)).forEach(u => {
+    const o = document.createElement('option');
+    o.value = u.id;
+    o.textContent = u.name;
+    sel.appendChild(o);
+  });
+}
+
+function buildPipelineTabs() {
+  const container = document.getElementById('pipelineTabs');
+  container.innerHTML = '';
+  const btn0 = document.createElement('button');
+  btn0.className = 'pipeline-tab active';
+  btn0.textContent = 'Todos';
+  btn0.onclick = () => { activePipelineTab = ''; setPipelineTab(btn0); renderFunil(getFilteredDeals()); };
+  container.appendChild(btn0);
+  allPipelines.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'pipeline-tab';
+    btn.textContent = p.name;
+    btn.dataset.pid = p.id;
+    btn.onclick = () => { activePipelineTab = p.id; setPipelineTab(btn); renderFunil(getFilteredDeals()); };
+    container.appendChild(btn);
+  });
+}
+
+function setPipelineTab(activeBtn) {
+  document.querySelectorAll('.pipeline-tab').forEach(b => b.classList.remove('active'));
+  activeBtn.classList.add('active');
+}
+
+// ─────────────────────────────────────────────
+// FILTERS
+// ─────────────────────────────────────────────
+function applyFilters() {
+  currentFilters.pipeline = document.getElementById('filterFunil').value;
+  currentFilters.user = document.getElementById('filterVendedor').value;
+  currentFilters.dateStart = document.getElementById('filterDateStart').value;
+  currentFilters.dateEnd = document.getElementById('filterDateEnd').value;
+  renderAll();
+}
+
+function getFilteredDeals() {
+  return allDeals.filter(d => {
+    if (currentFilters.pipeline) {
+      const pipeName = allPipelines.find(p => p.id === d.pipeline_id)?.name || '';
+      if (!matchesPipelineName(pipeName, currentFilters.pipeline)) return false;
+    }
+    if (currentFilters.user && String(d.user_id?.id || d.user_id) !== String(currentFilters.user)) return false;
+    if (currentFilters.dateStart) {
+      const created = (d.add_time || '').slice(0, 10);
+      if (created < currentFilters.dateStart) return false;
+    }
+    if (currentFilters.dateEnd) {
+      const created = (d.add_time || '').slice(0, 10);
+      if (created > currentFilters.dateEnd) return false;
+    }
     return true;
   });
 }
 
-// ─── APPLY FILTERS BUTTON ────────────────────────────────────────────────────
-function applyFilters(){
-  S.filters.pipeline = $('f-pipeline').value;
-  S.filters.user     = $('f-user').value;
-  S.filters.start    = $('f-start').value;
-  S.filters.end      = $('f-end').value;
-  renderAll();
+// ─────────────────────────────────────────────
+// RENDER ALL
+// ─────────────────────────────────────────────
+function renderAll() {
+  const deals = getFilteredDeals();
+  renderVisaoGeral(deals);
+  renderFunil(deals);
+  renderEquipe(deals);
+  renderAtividades();
+  renderIndividual(deals);
+  renderMotivoPerda(deals);
 }
 
-// ─── COMPUTE METRICS ─────────────────────────────────────────────────────────
-function computeMetrics(deals){
-  let total=0, won=0, lost=0, open=0, valWon=0, cycleSum=0, cycleN=0;
-  const byMonth={}, byStage={}, byUser={}, byReason={};
+// ─────────────────────────────────────────────
+// TAB 0: VISÃO GERAL
+// ─────────────────────────────────────────────
+function renderVisaoGeral(deals) {
+  const won = deals.filter(d => d.status === 'won');
+  const lost = deals.filter(d => d.status === 'lost');
+  const open = deals.filter(d => d.status === 'open');
+  const total = deals.length;
 
-  deals.forEach(d=>{
-    total++;
-    const status = d.status;
-    const mon = (d.add_time||'').slice(0,7);
-    if(!byMonth[mon]) byMonth[mon]={c:0,w:0,l:0};
-    byMonth[mon].c++;
+  const wonValue = won.reduce((s, d) => s + (d.value || 0), 0);
+  const lostValue = lost.reduce((s, d) => s + (d.value || 0), 0);
+  const convRate = total > 0 ? (won.length / total * 100) : 0;
+  const ticketMedio = won.length > 0 ? wonValue / won.length : 0;
 
-    const stageId = d.stage_id;
-    const stageName = S.stageMap[stageId]?.name || d.stage_name || `Etapa ${stageId}`;
-    const stageOrder = S.stageMap[stageId]?.order || 0;
-    if(!byStage[stageName]) byStage[stageName]={total:0,won:0,lost:0,open:0,order:stageOrder};
-    byStage[stageName].total++;
+  // Avg cycle time (days)
+  const closedWithTime = [...won, ...lost].filter(d => d.add_time && d.close_time);
+  const avgCycle = closedWithTime.length > 0
+    ? closedWithTime.reduce((s, d) => s + (daysBetween(d.add_time, d.close_time) || 0), 0) / closedWithTime.length
+    : 0;
 
-    const uid   = d.user_id?.id||d.user_id||0;
-    const uName = S.userMap[uid]||d.user_id?.name||'Sem vendedor';
-    if(!byUser[uName]) byUser[uName]={total:0,won:0,lost:0,open:0,val:0};
-    byUser[uName].total++;
+  // Main lost reason
+  const lostReasonMap = {};
+  lost.forEach(d => { const r = d.lost_reason || 'Sem motivo'; lostReasonMap[r] = (lostReasonMap[r] || 0) + 1; });
+  const mainReason = Object.entries(lostReasonMap).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
 
-    if(status==='won'){
-      won++; valWon+=(d.value||0);
-      byMonth[mon].w++;
-      byStage[stageName].won++;
-      byUser[uName].won++; byUser[uName].val+=(d.value||0);
-      if(d.won_time&&d.add_time){
-        const days=(new Date(d.won_time)-new Date(d.add_time))/864e5;
-        if(days>=0){cycleSum+=days;cycleN++;}
+  // KPI row
+  const kpiMain = document.getElementById('kpiRowMain');
+  kpiMain.innerHTML = `
+    ${kcard('Total de Leads', fmtNum(total), 'criados no período', '')}
+    ${kcard('Ganhos', fmtNum(won.length), fmtCurrency(wonValue), 'success')}
+    ${kcard('Perdidos', fmtNum(lost.length), fmtCurrency(lostValue), 'danger')}
+    ${kcard('Taxa de Conversão', fmtPct(convRate), `${won.length} ganhos / ${total} totais`, convRate >= 30 ? 'success' : 'warning')}
+    ${kcard('Em Aberto', fmtNum(open.length), 'negócios ativos', '')}
+    ${kcard('Ciclo Médio', Math.round(avgCycle) + ' dias', 'do lead ao fechamento', 'neutral')}
+  `;
+
+  // Results row
+  const kpiResults = document.getElementById('kpiRowResults');
+  kpiResults.innerHTML = `
+    <div class="kcard success">
+      <div class="kcard-label">Negócios Ganhos</div>
+      <div class="kcard-value">${fmtNum(won.length)}</div>
+      <div class="kcard-sub">Valor: <strong>${fmtCurrency(wonValue)}</strong></div>
+      <div class="kcard-sub" style="margin-top:4px">Ticket Médio: <strong>${fmtCurrency(ticketMedio)}</strong></div>
+    </div>
+    <div class="kcard danger">
+      <div class="kcard-label">Negócios Perdidos</div>
+      <div class="kcard-value">${fmtNum(lost.length)}</div>
+      <div class="kcard-sub">Valor: <strong>${fmtCurrency(lostValue)}</strong></div>
+      <div class="kcard-sub" style="margin-top:4px">Motivo Principal: <strong>${mainReason.length > 30 ? mainReason.slice(0,30)+'…' : mainReason}</strong></div>
+    </div>
+    <div class="kcard">
+      <div class="kcard-label">Ticket Médio (Ganhos)</div>
+      <div class="kcard-value">${fmtCurrency(ticketMedio)}</div>
+      <div class="kcard-sub">Conversão geral: <strong>${fmtPct(convRate)}</strong></div>
+      <div class="kcard-sub" style="margin-top:4px">Ciclo médio: <strong>${Math.round(avgCycle)} dias</strong></div>
+    </div>
+  `;
+
+  // Monthly charts
+  renderGanhosCountChart(won);
+  renderGanhosValueChart(won);
+  renderLeadsTopChart(deals);
+  renderLeadsResultChart(deals);
+  renderForecast(deals, open, won);
+}
+
+function kcard(label, value, sub, type) {
+  return `<div class="kcard ${type}"><div class="kcard-label">${label}</div><div class="kcard-value">${value}</div><div class="kcard-sub">${sub}</div></div>`;
+}
+
+function renderGanhosCountChart(won) {
+  const meta = parseInt(document.getElementById('metaGanhosCount').value) || CONFIG.metaGanhosCount;
+  const months = lastNMonthKeys(12);
+  const counts = months.map(m => won.filter(d => getMonthKey(d.close_time) === m).length);
+  const trend = linearRegression(counts);
+  const labels = months.map(getMonthLabel);
+
+  const momPct = counts.map((v, i) => {
+    if (i === 0 || counts[i-1] === 0) return null;
+    return ((v - counts[i-1]) / counts[i-1] * 100).toFixed(0);
+  });
+
+  const totalReal = counts.reduce((a, b) => a + b, 0);
+  const avgMonthly = totalReal / months.length;
+  const lastCount = counts[counts.length - 1];
+  const gapMeta = lastCount - meta;
+
+  document.getElementById('ganhosChartMeta').innerHTML = `
+    <div class="chart-meta-item"><strong>${totalReal}</strong> negócios ganhos</div>
+    <div class="chart-meta-item"><strong>${avgMonthly.toFixed(1)}</strong> média mensal</div>
+    <div class="chart-meta-item">Último mês: <strong>${lastCount}</strong></div>
+    <div class="chart-meta-item" style="color:${gapMeta >= 0 ? '#10b981' : '#ef4444'}">Gap vs meta: <strong>${gapMeta >= 0 ? '+' : ''}${gapMeta}</strong></div>
+  `;
+
+  destroyChart('chartGanhosCount');
+  const ctx = document.getElementById('chartGanhosCount').getContext('2d');
+  chartsRegistry['chartGanhosCount'] = new Chart(ctx, {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar', label: 'Ganhos', data: counts,
+          backgroundColor: counts.map(() => 'rgba(37,99,235,0.7)'),
+          borderRadius: 6, order: 2
+        },
+        {
+          type: 'line', label: 'Meta', data: counts.map(() => meta),
+          borderColor: '#f59e0b', borderWidth: 2, borderDash: [6,3],
+          pointRadius: 0, fill: false, order: 1
+        },
+        {
+          type: 'line', label: 'Tendência', data: trend,
+          borderColor: '#10b981', borderWidth: 2,
+          pointRadius: 0, fill: false, order: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+        tooltip: { callbacks: {
+          afterLabel: (ctx) => {
+            const i = ctx.dataIndex;
+            if (ctx.datasetIndex === 0 && momPct[i] != null) {
+              return `MoM: ${momPct[i] >= 0 ? '+' : ''}${momPct[i]}%`;
+            }
+          }
+        }},
+        datalabels: false
+      },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 } } },
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } }
       }
-    } else if(status==='lost'){
-      lost++;
-      byMonth[mon].l++;
-      byStage[stageName].lost++;
-      byUser[uName].lost++;
-      const reason = d.lost_reason||'Não informado';
-      byReason[reason]=(byReason[reason]||0)+1;
-      if(d.lost_time&&d.add_time){
-        const days=(new Date(d.lost_time)-new Date(d.add_time))/864e5;
-        if(days>=0){cycleSum+=days;cycleN++;}
+    },
+    plugins: [{
+      id: 'barLabels',
+      afterDatasetsDraw(chart) {
+        const ds = chart.data.datasets[0];
+        const meta2 = chart.getDatasetMeta(0);
+        const ctx2 = chart.ctx;
+        ctx2.save();
+        meta2.data.forEach((bar, i) => {
+          const pct = momPct[i];
+          if (pct == null) return;
+          const color = parseInt(pct) >= 0 ? '#10b981' : '#ef4444';
+          ctx2.fillStyle = color;
+          ctx2.font = 'bold 10px Inter, sans-serif';
+          ctx2.textAlign = 'center';
+          ctx2.fillText((parseInt(pct) >= 0 ? '+' : '') + pct + '%', bar.x, bar.y - 6);
+        });
+        ctx2.restore();
       }
-    } else {
-      open++;
-      byStage[stageName].open++;
-      byUser[uName].open++;
+    }]
+  });
+}
+
+function reRenderGanhosChart() {
+  const won = getFilteredDeals().filter(d => d.status === 'won');
+  renderGanhosCountChart(won);
+}
+
+function renderGanhosValueChart(won) {
+  const meta = parseInt(document.getElementById('metaGanhosValue').value) || CONFIG.metaGanhosValue;
+  const months = lastNMonthKeys(12);
+  const values = months.map(m => won.filter(d => getMonthKey(d.close_time) === m).reduce((s, d) => s + (d.value || 0), 0));
+  const labels = months.map(getMonthLabel);
+  const colors = values.map(v => v >= meta ? 'rgba(16,185,129,0.75)' : 'rgba(245,158,11,0.75)');
+
+  const totalVal = values.reduce((a, b) => a + b, 0);
+  const avgMonthly = totalVal / months.length;
+  const firstNonZero = values.find(v => v > 0) || 0;
+  const lastVal = values[values.length - 1];
+  const varGeral = firstNonZero > 0 ? ((lastVal - firstNonZero) / firstNonZero * 100) : 0;
+
+  document.getElementById('valorChartMeta').innerHTML = `
+    <div class="chart-meta-item">Receita Total: <strong>${fmtCurrency(totalVal)}</strong></div>
+    <div class="chart-meta-item">Média Mensal: <strong>${fmtCurrency(avgMonthly)}</strong></div>
+    <div class="chart-meta-item" style="color:${varGeral >= 0 ? '#10b981' : '#ef4444'}">Variação Geral: <strong>${varGeral >= 0 ? '+' : ''}${varGeral.toFixed(1)}%</strong></div>
+  `;
+
+  destroyChart('chartGanhosValue');
+  const ctx = document.getElementById('chartGanhosValue').getContext('2d');
+  chartsRegistry['chartGanhosValue'] = new Chart(ctx, {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar', label: 'Valor Ganho', data: values,
+          backgroundColor: colors, borderRadius: 6, order: 2
+        },
+        {
+          type: 'line', label: `Meta (${fmtCurrency(meta)})`, data: values.map(() => meta),
+          borderColor: '#2563eb', borderWidth: 2, borderDash: [6,3],
+          pointRadius: 0, fill: false, order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+        tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + fmtCurrencyFull(ctx.raw) } }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: '#f1f5f9' },
+          ticks: { font: { size: 11 }, callback: v => fmtCurrency(v) }
+        },
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    },
+    plugins: [{
+      id: 'barValLabels',
+      afterDatasetsDraw(chart) {
+        const meta2 = chart.getDatasetMeta(0);
+        const ctx2 = chart.ctx;
+        ctx2.save();
+        meta2.data.forEach((bar, i) => {
+          const val = values[i];
+          if (!val) return;
+          ctx2.fillStyle = '#1e293b';
+          ctx2.font = 'bold 9px Inter, sans-serif';
+          ctx2.textAlign = 'center';
+          ctx2.fillText(fmtCurrency(val), bar.x, bar.y - 5);
+        });
+        ctx2.restore();
+      }
+    }]
+  });
+}
+
+function reRenderValorChart() {
+  const won = getFilteredDeals().filter(d => d.status === 'won');
+  renderGanhosValueChart(won);
+}
+
+function renderLeadsTopChart(deals) {
+  const months = lastNMonthKeys(12);
+  const labels = months.map(getMonthLabel);
+  const counts = months.map(m => deals.filter(d => getMonthKey(d.add_time) === m).length);
+
+  destroyChart('chartLeadsTop');
+  const ctx = document.getElementById('chartLeadsTop').getContext('2d');
+  chartsRegistry['chartLeadsTop'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Leads Criados', data: counts,
+        backgroundColor: 'rgba(37,99,235,0.55)', borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 } } },
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+function renderLeadsResultChart(deals) {
+  const months = lastNMonthKeys(12);
+  const labels = months.map(getMonthLabel);
+  const won = deals.filter(d => d.status === 'won');
+  const lost = deals.filter(d => d.status === 'lost');
+  const wonCounts = months.map(m => won.filter(d => getMonthKey(d.close_time) === m).length);
+  const lostCounts = months.map(m => lost.filter(d => getMonthKey(d.close_time) === m).length);
+  const total = months.map((m, i) => wonCounts[i] + lostCounts[i]);
+  const convPct = total.map((t, i) => t > 0 ? +(wonCounts[i] / t * 100).toFixed(1) : 0);
+
+  destroyChart('chartLeadsResult');
+  const ctx = document.getElementById('chartLeadsResult').getContext('2d');
+  chartsRegistry['chartLeadsResult'] = new Chart(ctx, {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar', label: 'Ganhos', data: wonCounts,
+          backgroundColor: 'rgba(16,185,129,0.75)', borderRadius: 4, stack: 'stack', order: 2
+        },
+        {
+          type: 'bar', label: 'Perdidos', data: lostCounts,
+          backgroundColor: 'rgba(239,68,68,0.7)', borderRadius: 4, stack: 'stack', order: 2
+        },
+        {
+          type: 'line', label: 'Conversão %', data: convPct,
+          borderColor: '#2563eb', borderWidth: 2,
+          pointRadius: 3, pointBackgroundColor: '#2563eb',
+          fill: false, yAxisID: 'y2', order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+        tooltip: { callbacks: {
+          label: (ctx) => {
+            if (ctx.datasetIndex === 2) return 'Conversão: ' + ctx.raw + '%';
+            return ctx.dataset.label + ': ' + ctx.raw;
+          }
+        }}
+      },
+      scales: {
+        y: { beginAtZero: true, stacked: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 } } },
+        y2: { position: 'right', beginAtZero: true, max: 100, grid: { display: false }, ticks: { callback: v => v + '%', font: { size: 11 } } },
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+function renderForecast(deals, open, won) {
+  const now = new Date();
+  const stalled = open.filter(d => {
+    if (!d.update_time) return false;
+    return daysBetween(d.update_time, now.toISOString()) > 30;
+  });
+
+  // Weighted by stage order (later stages = higher probability)
+  const maxOrder = Math.max(...Object.values(allStages).map(s => s.order || 0), 1);
+  const committed = open.filter(d => {
+    const st = allStages[d.stage_id];
+    return st && (st.order || 0) >= maxOrder * 0.7;
+  }).reduce((s, d) => s + (d.value || 0), 0);
+
+  const atRisk = stalled.reduce((s, d) => s + (d.value || 0), 0);
+  const projected = open.reduce((s, d) => {
+    const st = allStages[d.stage_id];
+    const pct = st ? ((st.order || 0) / maxOrder) : 0.3;
+    return s + (d.value || 0) * pct;
+  }, 0);
+
+  const wonValue = won.reduce((s, d) => s + (d.value || 0), 0);
+  const gap = CONFIG.metaFaturamento - wonValue;
+
+  const wonWithTime = won.filter(d => d.add_time && d.close_time);
+  const avgClose = wonWithTime.length > 0
+    ? wonWithTime.reduce((s, d) => s + (daysBetween(d.add_time, d.close_time) || 0), 0) / wonWithTime.length
+    : 0;
+
+  document.getElementById('forecastRow').innerHTML = `
+    <div class="fcard">
+      <div class="fcard-label">Receita Comprometida</div>
+      <div class="fcard-value" style="color:#10b981">${fmtCurrency(committed)}</div>
+      <div class="fcard-sub">Deals em etapas finais</div>
+    </div>
+    <div class="fcard">
+      <div class="fcard-label">Receita em Risco</div>
+      <div class="fcard-value" style="color:#ef4444">${fmtCurrency(atRisk)}</div>
+      <div class="fcard-sub">${stalled.length} deals parados +30d</div>
+    </div>
+    <div class="fcard">
+      <div class="fcard-label">Receita Projetada</div>
+      <div class="fcard-value" style="color:#2563eb">${fmtCurrency(projected)}</div>
+      <div class="fcard-sub">Pipeline ponderado</div>
+    </div>
+    <div class="fcard">
+      <div class="fcard-label">Gap para Meta</div>
+      <div class="fcard-value" style="color:${gap <= 0 ? '#10b981' : '#ef4444'}">${fmtCurrency(Math.abs(gap))}</div>
+      <div class="fcard-sub">${gap <= 0 ? '✓ Meta atingida' : 'Faltam para R$ ' + fmtCurrency(CONFIG.metaFaturamento)}</div>
+    </div>
+  `;
+
+  // Pipeline open chart by stage
+  const stageMap = {};
+  open.forEach(d => {
+    const sn = allStages[d.stage_id]?.name || 'Desconhecida';
+    if (!stageMap[sn]) stageMap[sn] = { count: 0, value: 0 };
+    stageMap[sn].count++;
+    stageMap[sn].value += d.value || 0;
+  });
+  const stageEntries = Object.entries(stageMap).sort((a, b) => b[1].count - a[1].count).slice(0, 8);
+
+  destroyChart('chartPipelineOpen');
+  const ctx = document.getElementById('chartPipelineOpen').getContext('2d');
+  chartsRegistry['chartPipelineOpen'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: stageEntries.map(([k]) => k.length > 15 ? k.slice(0,15)+'…' : k),
+      datasets: [{
+        label: 'Negócios em Aberto', data: stageEntries.map(([,v]) => v.count),
+        backgroundColor: 'rgba(37,99,235,0.65)', borderRadius: 5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        x: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } }
+      }
     }
   });
 
-  return {total,won,lost,open,valWon,byMonth,byStage,byUser,byReason,
-          cycle: cycleN>0 ? Math.round(cycleSum/cycleN) : 0};
-}
-
-// ─── RENDER VISÃO GERAL ──────────────────────────────────────────────────────
-function renderVisao(m){
-  $('k-total').textContent   = m.total.toLocaleString('pt-BR');
-  $('k-conv').textContent    = pct(m.won, m.total);
-  $('k-open').textContent    = m.open.toLocaleString('pt-BR');
-  $('k-won').textContent     = m.won.toLocaleString('pt-BR');
-  $('k-val').textContent     = fmt(m.valWon);
-  $('k-ticket').textContent  = m.won>0 ? fmt(m.valWon/m.won) : 'R$0';
-  $('k-lost').textContent    = m.lost.toLocaleString('pt-BR');
-  $('k-loss-rate').textContent = pct(m.lost, m.total);
-  $('k-cycle').textContent   = m.cycle>0 ? m.cycle+' dias' : '—';
-
-  const months = Object.keys(m.byMonth).sort();
-  const lbls   = months.map(k=>{ const [y,mo]=k.split('-'); return new Date(y,+mo-1).toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}); });
-
-  mkChart('ch-monthly',{type:'bar',data:{
-    labels:lbls,
-    datasets:[
-      {label:'Criados', data:months.map(k=>m.byMonth[k].c), backgroundColor:'rgba(67,97,238,.75)', borderRadius:4},
-      {label:'Ganhos',  data:months.map(k=>m.byMonth[k].w), backgroundColor:'rgba(46,196,182,.75)', borderRadius:4},
-      {label:'Perdidos',data:months.map(k=>m.byMonth[k].l), backgroundColor:'rgba(230,57,70,.75)',   borderRadius:4},
-    ]},
-    options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}
+  // Stalled by user
+  const stalledByUser = {};
+  stalled.forEach(d => {
+    const uid = d.user_id?.id || d.user_id;
+    const name = allUsers[uid] || ('User ' + uid);
+    stalledByUser[name] = (stalledByUser[name] || 0) + 1;
   });
-  mkChart('ch-won',{type:'line',data:{
-    labels:lbls,
-    datasets:[{label:'Ganhos',data:months.map(k=>m.byMonth[k].w),
-      borderColor:'#2ec4b6',backgroundColor:'rgba(46,196,182,.15)',
-      fill:true,tension:.4,pointBackgroundColor:'#2ec4b6',pointRadius:4}]},
-    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}
-  });
-  mkChart('ch-val',{type:'bar',data:{
-    labels:lbls,
-    datasets:[{label:'R$ Ganho',data:months.map(k=>{
-      let v=0; filterDeals().filter(d=>d.status==='won'&&(d.add_time||'').slice(0,7)===k).forEach(d=>v+=(d.value||0)); return v;
-    }),backgroundColor:'rgba(46,196,182,.7)',borderRadius:4}]},
-    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{callback:v=>fmt(v)}}}}
+  const stalledEntries = Object.entries(stalledByUser).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+  destroyChart('chartStalled');
+  const ctx2 = document.getElementById('chartStalled').getContext('2d');
+  chartsRegistry['chartStalled'] = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: stalledEntries.map(([k]) => k),
+      datasets: [{
+        label: 'Deals Parados', data: stalledEntries.map(([,v]) => v),
+        backgroundColor: 'rgba(239,68,68,0.65)', borderRadius: 5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        x: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } }, beginAtZero: true }
+      }
+    }
   });
 }
 
-// ─── FUNIL VISUAL (Canvas trapézio) ──────────────────────────────────────────
-function drawFunnelCanvas(stages){
-  const canvas = $('funnel-canvas');
-  const W = canvas.parentElement.clientWidth || 500;
-  canvas.width  = W;
-  canvas.height = 300;
+// ─────────────────────────────────────────────
+// TAB 1: FUNIL
+// ─────────────────────────────────────────────
+function renderFunil(deals) {
+  // Filter by active pipeline tab
+  let filteredDeals = deals;
+  if (activePipelineTab) {
+    filteredDeals = deals.filter(d => String(d.pipeline_id) === String(activePipelineTab));
+  }
+
+  // Build stage data
+  const stageData = {};
+  filteredDeals.forEach(d => {
+    const sid = d.stage_id;
+    if (!stageData[sid]) {
+      const st = allStages[sid] || { name: 'Desconhecida', order: 0, pipeline_id: d.pipeline_id, pipeline_name: '' };
+      stageData[sid] = { ...st, id: sid, total: 0, won: 0, lost: 0, open: 0 };
+    }
+    stageData[sid].total++;
+    if (d.status === 'won') stageData[sid].won++;
+    else if (d.status === 'lost') stageData[sid].lost++;
+    else stageData[sid].open++;
+  });
+
+  const stages = Object.values(stageData).sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  drawFunnelCanvas(stages, 'funnelCanvas');
+  renderFunnelSide(stages, filteredDeals);
+  renderFunnelConvChart(stages);
+  renderFunnelTable(stages);
+}
+
+function drawFunnelCanvas(stages, canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const parent = canvas.parentElement;
+  canvas.width = parent.clientWidth || 600;
+  canvas.height = 420;
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,W,300);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const entries = Object.entries(stages).sort((a,b)=>a[1].order-b[1].order);
-  if(!entries.length){ ctx.fillStyle='#9ca3af'; ctx.font='14px Inter'; ctx.textAlign='center'; ctx.fillText('Sem dados',W/2,150); return; }
+  if (!stages.length) {
+    ctx.fillStyle = '#64748b';
+    ctx.font = '14px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Sem dados para o funil selecionado', canvas.width / 2, 210);
+    return;
+  }
 
-  const maxT   = Math.max(...entries.map(([,v])=>v.total)) || 1;
-  const N      = entries.length;
-  const stH    = Math.max(Math.min(280/N, 52), 28);
-  const topW   = W * 0.9;
-  const minW   = W * 0.18;
-  const startY = (300 - stH*N)/2;
+  const padding = 40;
+  const maxW = canvas.width - 2 * padding;
+  const maxStages = Math.min(stages.length, 8);
+  const sliceH = Math.floor((canvas.height - padding * 2) / maxStages) - 4;
+  const maxTotal = Math.max(...stages.map(s => s.total), 1);
 
-  const colors = ['#4361ee','#7b52d9','#b040c9','#e94560','#f5a623','#2ec4b6','#0dcaf0','#ff6b6b'];
+  // Find bottleneck
+  let bottleneckIdx = 0;
+  let maxDrop = 0;
+  for (let i = 1; i < stages.length; i++) {
+    const prev = stages[i-1].total;
+    const curr = stages[i].total;
+    const drop = prev > 0 ? (prev - curr) / prev : 0;
+    if (drop > maxDrop) { maxDrop = drop; bottleneckIdx = i; }
+  }
 
-  entries.forEach(([name, v], i)=>{
-    const ratioTop  = i===0 ? 1 : entries[i-1][1].total/maxT;
-    const ratioBot  = v.total/maxT;
-    const wTop      = minW + (topW-minW)*ratioTop;
-    const wBot      = minW + (topW-minW)*ratioBot*0.92;
-    const xTop      = (W-wTop)/2;
-    const xBot      = (W-wBot)/2;
-    const y         = startY + i*stH;
+  for (let i = 0; i < maxStages; i++) {
+    const s = stages[i];
+    const ratio = maxTotal > 0 ? s.total / maxTotal : 1;
+    const w = Math.max(ratio * maxW, 60);
+    const nextRatio = i < maxStages - 1 ? stages[i+1].total / maxTotal : ratio * 0.6;
+    const nextW = Math.max(nextRatio * maxW, 50);
+    const x = (canvas.width - w) / 2;
+    const nextX = (canvas.width - nextW) / 2;
+    const y = padding + i * (sliceH + 4);
 
-    const nextRatioBot = i<N-1 ? entries[i+1][1].total/maxT : ratioBot*0.85;
-    const wNext = minW + (topW-minW)*nextRatioBot*0.92;
-    const xNext = (W-wNext)/2;
+    // Gradient blue
+    const t = i / Math.max(maxStages - 1, 1);
+    const r = Math.round(96 - t * 60);
+    const g = Math.round(165 - t * 100);
+    const b = Math.round(250 - t * 80);
+    const fillColor = `rgba(${r},${g},${b},0.85)`;
 
     ctx.beginPath();
-    ctx.moveTo(xTop, y);
-    ctx.lineTo(xTop+wTop, y);
-    ctx.lineTo(xNext+wNext, y+stH-1);
-    ctx.lineTo(xNext, y+stH-1);
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + w, y);
+    ctx.lineTo(nextX + nextW, y + sliceH);
+    ctx.lineTo(nextX, y + sliceH);
     ctx.closePath();
-    const grad = ctx.createLinearGradient(0,y,0,y+stH);
-    const col  = colors[i%colors.length];
-    grad.addColorStop(0, col+'ee'); grad.addColorStop(1, col+'99');
-    ctx.fillStyle = grad;
+    ctx.fillStyle = fillColor;
     ctx.fill();
 
-    ctx.fillStyle='#fff';
-    const fs = Math.min(13, stH*0.38);
-    ctx.font = `600 ${fs}px Inter,sans-serif`;
-    ctx.textAlign='center';
-    ctx.textBaseline='middle';
-    const conv = v.won+v.lost>0 ? (v.won/(v.won+v.lost)*100).toFixed(0)+'%' : '—';
-    const label = `${name.length>22?name.slice(0,20)+'…':name}  •  ${v.total}  •  conv ${conv}`;
-    ctx.fillText(label, W/2, y+stH/2);
-  });
-}
+    // Bottleneck border
+    if (i === bottleneckIdx) {
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
 
-// ─── RENDER FUNIL TAB ────────────────────────────────────────────────────────
-function onFunilChange(){
-  const pid = $('f2-pipeline').value;
-  $('f-pipeline').value = pid;
-  S.filters.pipeline = pid;
-  renderFunil();
-}
-
-function renderFunil(){
-  const deals = filterDeals();
-  const m = computeMetrics(deals);
-  const stages = m.byStage;
-
-  drawFunnelCanvas(stages);
-
-  const entries = Object.entries(stages).sort((a,b)=>a[1].order-b[1].order);
-  const lbls = entries.map(([n])=>n.length>18?n.slice(0,16)+'…':n);
-  const convData = entries.map(([,v])=>v.won+v.lost>0 ? +(v.won/(v.won+v.lost)*100).toFixed(1) : 0);
-
-  mkChart('ch-conv',{type:'bar',data:{
-    labels:lbls,
-    datasets:[{label:'Conversão %', data:convData,
-      backgroundColor:convData.map(v=>v>50?'rgba(46,196,182,.8)':v>25?'rgba(243,186,47,.8)':'rgba(230,57,70,.8)'),
-      borderRadius:6}]},
-    options:{responsive:true,indexAxis:'y',
-      plugins:{legend:{display:false},datalabels:{display:false}},
-      scales:{x:{max:100,ticks:{callback:v=>v+'%'},grid:{display:false}},y:{grid:{display:false}}}}
-  });
-
-  const maxT = Math.max(...entries.map(([,v])=>v.total))||1;
-  const tbody = $('stage-tbody');
-  tbody.innerHTML = entries.map(([name,v])=>{
-    const conv = v.won+v.lost>0 ? (v.won/(v.won+v.lost)*100).toFixed(1) : 0;
-    const barW  = Math.round(v.total/maxT*120);
-    return `<tr>
-      <td><strong>${name}</strong></td>
-      <td>${v.total.toLocaleString('pt-BR')}</td>
-      <td><span class="tag g">${v.won}</span></td>
-      <td><span class="tag r">${v.lost}</span></td>
-      <td>${v.open}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:6px">
-          <div class="bar-mini ${+conv>50?'green':''}" style="width:${barW}px"></div>
-          <span style="font-weight:700;color:${+conv>50?'#2ec4b6':+conv>25?'#f4a261':'#e63946'}">${conv}%</span>
-        </div>
-      </td>
-      <td><div style="background:#e5e7eb;border-radius:4px;height:6px;width:120px;overflow:hidden">
-        <div style="background:var(--blue);width:${barW}px;height:100%;border-radius:4px"></div>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-// ─── RENDER EQUIPE ────────────────────────────────────────────────────────────
-function renderEquipe(m){
-  const entries = Object.entries(m.byUser).sort((a,b)=>b[1].won-a[1].won);
-  const lbls = entries.map(([n])=>n.split(' ')[0]);
-  mkChart('ch-team',{type:'bar',data:{
-    labels:lbls,
-    datasets:[
-      {label:'Ganhos', data:entries.map(([,v])=>v.won),  backgroundColor:'rgba(46,196,182,.8)', borderRadius:4},
-      {label:'Perdidos',data:entries.map(([,v])=>v.lost), backgroundColor:'rgba(230,57,70,.8)',  borderRadius:4},
-      {label:'Aberto', data:entries.map(([,v])=>v.open),  backgroundColor:'rgba(67,97,238,.8)',  borderRadius:4},
-    ]},
-    options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true}}}
-  });
-
-  $('team-tbody').innerHTML = entries.map(([name,v])=>{
-    const ini = name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
-    const conv = pct(v.won, v.won+v.lost);
-    return `<tr>
-      <td><span class="avatar">${ini}</span>${name}</td>
-      <td>${v.total}</td>
-      <td><span class="tag g">${v.won}</span></td>
-      <td><span class="tag r">${v.lost}</span></td>
-      <td><span class="tag b">${v.open}</span></td>
-      <td><strong>${conv}</strong></td>
-      <td>${fmt(v.val)}</td>
-    </tr>`;
-  }).join('');
-}
-
-// ─── RENDER MOTIVOS DE PERDA ──────────────────────────────────────────────────
-function renderPerdas(m){
-  const entries = Object.entries(m.byReason).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const total   = entries.reduce((s,[,v])=>s+v,0)||1;
-  const palette = ['#e63946','#f4a261','#7b52d9','#4361ee','#2ec4b6','#f9c74f','#b040c9','#0dcaf0','#ff6b6b','#adb5bd'];
-
-  mkChart('ch-reasons',{type:'doughnut',data:{
-    labels:entries.map(([n])=>n),
-    datasets:[{data:entries.map(([,v])=>v), backgroundColor:palette, borderWidth:2, borderColor:'#fff'}]},
-    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}
-  });
-
-  $('reasons-list').innerHTML = entries.map(([reason,cnt],i)=>`
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <div style="width:10px;height:10px;border-radius:50%;background:${palette[i]};flex-shrink:0"></div>
-      <div style="flex:1;font-size:13px">${reason}</div>
-      <div style="font-weight:700;font-size:13px">${cnt}</div>
-      <div style="font-size:11px;color:var(--muted)">${(cnt/total*100).toFixed(0)}%</div>
-    </div>`).join('');
-}
-
-// ─── RENDER ALL ──────────────────────────────────────────────────────────────
-function renderAll(){
-  hideErr();
-  const deals = filterDeals();
-  const m     = computeMetrics(deals);
-  renderVisao(m);
-  renderEquipe(m);
-  renderPerdas(m);
-  // Funil só se aba estiver ativa
-  if(document.querySelector('[data-tab="funil"]').classList.contains('active')) renderFunil();
-  $('last-update').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR');
-}
-
-// ─── LOAD ALL ────────────────────────────────────────────────────────────────
-async function loadAll(){
-  showLoad('Conectando ao Pipedrive…');
-  hideErr();
-  try {
-    showLoad('Carregando filtros…');
-    await loadFilters();
-    showLoad('Baixando negócios…');
-    S.deals = await fetchDeals();
-    renderAll();
-  } catch(e){
-    showErr(e.message||'Erro desconhecido');
-  } finally {
-    hideLoad();
+    // Text
+    const convNext = i < maxStages - 1 && stages[i].total > 0
+      ? (stages[i+1].total / stages[i].total * 100).toFixed(0) + '%→'
+      : '';
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    const cy = y + sliceH / 2;
+    ctx.fillText(s.name.length > 22 ? s.name.slice(0,22)+'…' : s.name, canvas.width/2, cy - 6);
+    ctx.font = '11px Inter, sans-serif';
+    ctx.fillText(`${s.total} deals${convNext ? ' · ' + convNext : ''}`, canvas.width/2, cy + 9);
+    if (i === bottleneckIdx) {
+      ctx.font = 'bold 10px Inter, sans-serif';
+      ctx.fillStyle = '#fef2f2';
+      ctx.fillText('⚠ Gargalo', canvas.width/2, cy + 22);
+    }
   }
 }
 
-// ─── AUTO REFRESH ─────────────────────────────────────────────────────────────
-function startRefresh(){
-  clearInterval(refreshTimer);
-  refreshSec = 300;
-  refreshTimer = setInterval(()=>{
-    refreshSec--;
-    const h=String(Math.floor(refreshSec/3600)).padStart(1,'0');
-    const m=String(Math.floor((refreshSec%3600)/60)).padStart(2,'0');
-    const s=String(refreshSec%60).padStart(2,'0');
-    $('refresh-label').textContent = `Auto-refresh: ${h}:${m}:${s}`;
-    if(refreshSec<=0){ loadAll(); startRefresh(); }
+function renderFunnelSide(stages, deals) {
+  const container = document.getElementById('funnelSide');
+  const total = deals.length;
+  const won = deals.filter(d => d.status === 'won').length;
+  const convGeral = total > 0 ? (won / total * 100).toFixed(1) : 0;
+
+  container.innerHTML = `
+    <div class="funnel-stat">
+      <div class="funnel-stat-label">Taxa Geral de Conversão</div>
+      <div class="funnel-stat-value" style="color:#10b981">${convGeral}%</div>
+    </div>
+    <div class="funnel-stat">
+      <div class="funnel-stat-label">Volume Entrada</div>
+      <div class="funnel-stat-value">${total}</div>
+    </div>
+    <div class="funnel-stat">
+      <div class="funnel-stat-label">Volume Saída (Ganhos)</div>
+      <div class="funnel-stat-value" style="color:#10b981">${won}</div>
+    </div>
+    <div class="funnel-stat">
+      <div class="funnel-stat-label">Total de Etapas</div>
+      <div class="funnel-stat-value">${stages.length}</div>
+    </div>
+  `;
+}
+
+function renderFunnelConvChart(stages) {
+  const labels = stages.map(s => s.name.length > 15 ? s.name.slice(0,15)+'…' : s.name);
+  const volumes = stages.map(s => s.total);
+  const convPct = stages.map((s, i) => {
+    if (i === stages.length - 1) return s.total > 0 ? 100 : 0;
+    return stages[i].total > 0 ? +(stages[i+1].total / stages[i].total * 100).toFixed(1) : 0;
+  });
+  const barColors = convPct.map(p => p >= 50 ? 'rgba(16,185,129,0.7)' : p >= 20 ? 'rgba(245,158,11,0.7)' : 'rgba(239,68,68,0.7)');
+
+  destroyChart('chartFunnelConv');
+  const ctx = document.getElementById('chartFunnelConv').getContext('2d');
+  chartsRegistry['chartFunnelConv'] = new Chart(ctx, {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar', label: 'Volume', data: volumes,
+          backgroundColor: barColors, borderRadius: 5, order: 2
+        },
+        {
+          type: 'line', label: 'Conversão %', data: convPct,
+          borderColor: '#2563eb', borderWidth: 2,
+          pointRadius: 4, pointBackgroundColor: '#2563eb',
+          fill: false, yAxisID: 'y2', order: 1
+        },
+        {
+          type: 'line', label: `Benchmark ${CONFIG.benchmarkConversao}%`, data: labels.map(() => CONFIG.benchmarkConversao),
+          borderColor: '#94a3b8', borderWidth: 1, borderDash: [4,3],
+          pointRadius: 0, fill: false, yAxisID: 'y2', order: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 } } },
+        y2: { position: 'right', beginAtZero: true, max: 105, grid: { display: false }, ticks: { callback: v => v + '%', font: { size: 11 } } },
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+function renderFunnelTable(stages) {
+  const maxTotal = Math.max(...stages.map(s => s.total), 1);
+  const table = document.getElementById('tableFunnel');
+  if (!stages.length) { table.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:#64748b">Sem dados</td></tr>'; return; }
+
+  const totalStages = stages.length;
+  const getPos = (i) => {
+    if (i < totalStages * 0.33) return 'Topo';
+    if (i < totalStages * 0.67) return 'Meio';
+    return 'Fundo';
+  };
+
+  const convPct = stages.map((s, i) => {
+    if (i === stages.length - 1) return 100;
+    return s.total > 0 ? +(stages[i+1].total / s.total * 100).toFixed(1) : 0;
+  });
+
+  let bottleneckIdx = 0, maxDrop = 0;
+  for (let i = 1; i < stages.length; i++) {
+    const drop = stages[i-1].total > 0 ? (stages[i-1].total - stages[i].total) / stages[i-1].total : 0;
+    if (drop > maxDrop) { maxDrop = drop; bottleneckIdx = i; }
+  }
+
+  table.innerHTML = `
+    <thead><tr>
+      <th>Etapa</th><th>Posição</th><th>Total</th><th>Ganhos</th><th>Perdidos</th><th>Abertos</th><th>Conv. p/ próxima</th><th>Taxa Perda</th>
+    </tr></thead>
+    <tbody>
+    ${stages.map((s, i) => {
+      const cp = convPct[i];
+      const lostPct = s.total > 0 ? (s.lost / s.total * 100).toFixed(1) : '0.0';
+      const cpColor = cp >= 50 ? '#10b981' : cp >= 20 ? '#f59e0b' : '#ef4444';
+      const isBottom = i === bottleneckIdx;
+      return `<tr style="${isBottom ? 'background:#fef2f2' : ''}">
+        <td><strong>${s.name}</strong>${isBottom ? ' <span style="color:#ef4444">⚠</span>' : ''}</td>
+        <td><span style="font-size:11px;color:#64748b">${getPos(i)}</span></td>
+        <td>${s.total}</td>
+        <td class="badge-green">${s.won}</td>
+        <td class="badge-red">${s.lost}</td>
+        <td>${s.open}</td>
+        <td><span style="color:${cpColor};font-weight:700">${cp}%</span></td>
+        <td><span style="color:${parseFloat(lostPct) > 30 ? '#ef4444' : '#64748b'}">${lostPct}%</span></td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// TAB 2: EQUIPE
+// ─────────────────────────────────────────────
+function renderEquipe(deals) {
+  const byUser = {};
+  deals.forEach(d => {
+    const uid = d.user_id?.id || d.user_id;
+    const name = allUsers[uid] || ('User ' + uid);
+    if (!byUser[name]) byUser[name] = { name, leads: 0, won: 0, lost: 0, value: 0 };
+    byUser[name].leads++;
+    if (d.status === 'won') { byUser[name].won++; byUser[name].value += d.value || 0; }
+    if (d.status === 'lost') byUser[name].lost++;
+  });
+
+  const entries = Object.values(byUser);
+  entries.forEach(u => {
+    u.conv = u.leads > 0 ? +(u.won / u.leads * 100).toFixed(1) : 0;
+    u.ticket = u.won > 0 ? u.value / u.won : 0;
+  });
+
+  const avgConv = entries.length > 0 ? entries.reduce((s, u) => s + u.conv, 0) / entries.length : 0;
+  const avgValue = entries.length > 0 ? entries.reduce((s, u) => s + u.value, 0) / entries.length : 0;
+  entries.forEach(u => { u.vsMedia = u.value - avgValue; });
+
+  let sorted;
+  if (teamMetric === 'receita') sorted = [...entries].sort((a, b) => b.value - a.value);
+  else if (teamMetric === 'conversao') sorted = [...entries].sort((a, b) => b.conv - a.conv);
+  else sorted = [...entries].sort((a, b) => b.leads - a.leads);
+
+  const names = sorted.map(u => u.name);
+  let chartData, chartLabel, chartColor;
+  if (teamMetric === 'receita') {
+    chartData = sorted.map(u => u.value);
+    chartLabel = 'Receita (R$)';
+    chartColor = sorted.map(u => u.value >= avgValue ? 'rgba(16,185,129,0.7)' : 'rgba(239,68,68,0.7)');
+  } else if (teamMetric === 'conversao') {
+    chartData = sorted.map(u => u.conv);
+    chartLabel = 'Conversão (%)';
+    chartColor = sorted.map(u => u.conv >= avgConv ? 'rgba(16,185,129,0.7)' : 'rgba(239,68,68,0.7)');
+  } else {
+    chartData = sorted.map(u => u.leads);
+    chartLabel = 'Volume (leads)';
+    chartColor = 'rgba(37,99,235,0.65)';
+  }
+
+  destroyChart('chartEquipe');
+  const ctx = document.getElementById('chartEquipe').getContext('2d');
+  chartsRegistry['chartEquipe'] = new Chart(ctx, {
+    data: {
+      labels: names,
+      datasets: [
+        {
+          type: 'bar', label: chartLabel, data: chartData,
+          backgroundColor: chartColor, borderRadius: 6, order: 2
+        },
+        {
+          type: 'line', label: 'Conversão %', data: sorted.map(u => u.conv),
+          borderColor: '#2563eb', borderWidth: 2, pointRadius: 4,
+          pointBackgroundColor: '#2563eb', fill: false, yAxisID: 'y2', order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } },
+      scales: {
+        y: {
+          beginAtZero: true, grid: { color: '#f1f5f9' },
+          ticks: { font: { size: 11 }, callback: teamMetric === 'receita' ? v => fmtCurrency(v) : undefined }
+        },
+        y2: { position: 'right', beginAtZero: true, max: 100, grid: { display: false }, ticks: { callback: v => v + '%', font: { size: 11 } } },
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+
+  // Table
+  const table = document.getElementById('tableEquipe');
+  if (!sorted.length) { table.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#64748b">Sem dados</td></tr>'; return; }
+  table.innerHTML = `
+    <thead><tr>
+      <th>Vendedor</th><th>Leads</th><th>Ganhos</th><th>Conversão</th><th>Ticket Médio</th><th>Receita</th><th>vs Média</th>
+    </tr></thead>
+    <tbody>
+    ${sorted.map(u => `<tr>
+      <td><strong>${u.name}</strong></td>
+      <td>${u.leads}</td>
+      <td class="badge-green">${u.won}</td>
+      <td><span style="color:${u.conv >= avgConv ? '#10b981' : '#ef4444'};font-weight:700">${fmtPct(u.conv)}</span></td>
+      <td>${fmtCurrency(u.ticket)}</td>
+      <td>${fmtCurrency(u.value)}</td>
+      <td><span style="color:${u.vsMedia >= 0 ? '#10b981' : '#ef4444'};font-weight:700">${u.vsMedia >= 0 ? '+' : ''}${fmtCurrency(u.vsMedia)}</span></td>
+    </tr>`).join('')}
+    </tbody>
+  `;
+}
+
+function setTeamMetric(metric, btn) {
+  teamMetric = metric;
+  document.querySelectorAll('.team-toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderEquipe(getFilteredDeals());
+}
+
+// ─────────────────────────────────────────────
+// TAB 3: ATIVIDADES
+// ─────────────────────────────────────────────
+function renderAtividades() {
+  const open = allActivities;
+  const done = allActivitiesDone;
+  const all = [...open, ...done];
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+
+  const atrasadas = open.filter(a => a.due_date && a.due_date < todayStr && !a.done);
+  const totalCount = all.length;
+  const doneCount = done.length;
+  const openCount = open.length;
+  const lateCount = atrasadas.length;
+  const convRate = totalCount > 0 ? (doneCount / totalCount * 100) : 0;
+  const lateRate = openCount > 0 ? (lateCount / openCount * 100) : 0;
+
+  document.getElementById('kpiAtividades').innerHTML = `
+    ${kcard('Total Atividades', fmtNum(totalCount), 'abertas + concluídas', '')}
+    ${kcard('Concluídas', fmtNum(doneCount), fmtPct(convRate) + ' do total', 'success')}
+    ${kcard('Em Aberto', fmtNum(openCount), 'a realizar', '')}
+    ${kcard('Atrasadas', fmtNum(lateCount), 'vencidas e abertas', 'danger')}
+    ${kcard('Taxa Conclusão', fmtPct(convRate), `${doneCount} concluídas`, convRate >= 70 ? 'success' : 'warning')}
+    ${kcard('Taxa de Atraso', fmtPct(lateRate), `${lateCount} atrasadas`, lateRate < 20 ? 'success' : 'danger')}
+  `;
+
+  // By user stacked
+  const byUser = {};
+  const gatherUserActs = (list, key) => list.forEach(a => {
+    const uid = a.user_id;
+    const name = allUsers[uid] || ('User ' + uid);
+    if (!byUser[name]) byUser[name] = { concluidas: 0, atrasadas: 0, abertas: 0 };
+    byUser[name][key]++;
+  });
+  gatherUserActs(done, 'concluidas');
+  gatherUserActs(atrasadas, 'atrasadas');
+  gatherUserActs(open.filter(a => !(a.due_date && a.due_date < todayStr)), 'abertas');
+
+  const userNames = Object.keys(byUser);
+  destroyChart('chartAtivVendedor');
+  const ctx = document.getElementById('chartAtivVendedor').getContext('2d');
+  chartsRegistry['chartAtivVendedor'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: userNames,
+      datasets: [
+        { label: 'Concluídas', data: userNames.map(n => byUser[n].concluidas), backgroundColor: 'rgba(16,185,129,0.75)', borderRadius: 4 },
+        { label: 'Atrasadas', data: userNames.map(n => byUser[n].atrasadas), backgroundColor: 'rgba(239,68,68,0.7)', borderRadius: 4 },
+        { label: 'Abertas', data: userNames.map(n => byUser[n].abertas), backgroundColor: 'rgba(148,163,184,0.6)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 12, font: { size: 11 } } } },
+      scales: {
+        y: { beginAtZero: true, stacked: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 } } },
+        x: { grid: { display: false }, stacked: true, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+
+  // Temporal (by month)
+  const months = lastNMonthKeys(12);
+  const labels = months.map(getMonthLabel);
+  const donePerMonth = months.map(m => done.filter(a => getMonthKey(a.update_time || a.due_date) === m).length);
+
+  destroyChart('chartAtivTemporal');
+  const ctx2 = document.getElementById('chartAtivTemporal').getContext('2d');
+  chartsRegistry['chartAtivTemporal'] = new Chart(ctx2, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Atividades Concluídas', data: donePerMonth,
+        borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)',
+        borderWidth: 2, pointRadius: 4, fill: true
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 } } },
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// TAB 4: INDIVIDUAL (GAUGES)
+// ─────────────────────────────────────────────
+function renderIndividual(deals) {
+  const won = deals.filter(d => d.status === 'won');
+  const wonValue = won.reduce((s, d) => s + (d.value || 0), 0);
+  const wonCount = won.length;
+
+  // Company goals
+  document.getElementById('gaugesEmpresa').innerHTML = `
+    <div class="gauge-card">
+      <div class="gauge-title">Empresa</div>
+      <div class="gauge-label">Faturamento Total</div>
+      <div class="gauge-canvas-wrap"><canvas id="gaugeEmpFat" width="180" height="100"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeEmpFatPct">0%</div><div class="gauge-pct-sub">realizado</div></div></div>
+      <div class="gauge-bottom">Meta: <strong>${fmtCurrency(CONFIG.metaFaturamento)}</strong> | Realiz.: <strong>${fmtCurrency(wonValue)}</strong></div>
+    </div>
+    <div class="gauge-card">
+      <div class="gauge-title">Empresa</div>
+      <div class="gauge-label">Novas Contas</div>
+      <div class="gauge-canvas-wrap"><canvas id="gaugeEmpContas" width="180" height="100"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeEmpContasPct">0%</div><div class="gauge-pct-sub">realizado</div></div></div>
+      <div class="gauge-bottom">Meta: <strong>${CONFIG.metaNovasContas}</strong> | Realiz.: <strong>${wonCount}</strong></div>
+    </div>
+  `;
+
+  drawGauge('gaugeEmpFat', wonValue, CONFIG.metaFaturamento, 'gaugeEmpFatPct');
+  drawGauge('gaugeEmpContas', wonCount, CONFIG.metaNovasContas, 'gaugeEmpContasPct');
+
+  // Closers — by user for Vendas pipeline
+  const vendaPipe = allPipelines.find(p => p.name.toLowerCase().includes('vend'));
+  const closerDeals = vendaPipe ? deals.filter(d => d.pipeline_id === vendaPipe.id && d.status === 'won') : won;
+  const closersByUser = {};
+  closerDeals.forEach(d => {
+    const uid = d.user_id?.id || d.user_id;
+    const name = allUsers[uid] || ('User ' + uid);
+    if (!closersByUser[name]) closersByUser[name] = { count: 0, value: 0 };
+    closersByUser[name].count++;
+    closersByUser[name].value += d.value || 0;
+  });
+
+  const closerEntries = Object.entries(closersByUser).slice(0, 6);
+  const gaugesClosersEl = document.getElementById('gaugesClosers');
+  if (!closerEntries.length) {
+    gaugesClosersEl.innerHTML = '<div style="color:#64748b;font-size:13px;padding:16px">Sem dados de closers</div>';
+  } else {
+    gaugesClosersEl.innerHTML = closerEntries.map(([name, u], i) => `
+      <div class="gauge-card">
+        <div class="gauge-title">Closer</div>
+        <div class="gauge-label">${name}</div>
+        <div style="margin-bottom:8px">
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px">Novas Contas</div>
+          <div class="gauge-canvas-wrap"><canvas id="gaugeC_${i}_contas" width="160" height="90"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeC_${i}_contasPct" style="font-size:18px">0%</div></div></div>
+          <div style="font-size:11px;color:#64748b;text-align:center">${u.count} / ${CONFIG.metaCloserContas}</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px">MRR</div>
+          <div class="gauge-canvas-wrap"><canvas id="gaugeC_${i}_mrr" width="160" height="90"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeC_${i}_mrrPct" style="font-size:18px">0%</div></div></div>
+          <div style="font-size:11px;color:#64748b;text-align:center">${fmtCurrency(u.value)} / ${fmtCurrency(CONFIG.metaCloserMRR)}</div>
+        </div>
+      </div>
+    `).join('');
+    closerEntries.forEach(([name, u], i) => {
+      drawGauge(`gaugeC_${i}_contas`, u.count, CONFIG.metaCloserContas, `gaugeC_${i}_contasPct`);
+      drawGauge(`gaugeC_${i}_mrr`, u.value, CONFIG.metaCloserMRR, `gaugeC_${i}_mrrPct`);
+    });
+  }
+
+  // SDR — from pre-venda pipeline, count meetings (reunioes)
+  const sdrPipe = allPipelines.find(p => {
+    const n = p.name.toLowerCase();
+    return n.includes('pré') || n.includes('pre') || n.includes('sdr');
+  });
+  const sdrDeals = sdrPipe ? deals.filter(d => d.pipeline_id === sdrPipe.id) : [];
+  const sdrByUser = {};
+  sdrDeals.forEach(d => {
+    const uid = d.user_id?.id || d.user_id;
+    const name = allUsers[uid] || ('User ' + uid);
+    if (!sdrByUser[name]) sdrByUser[name] = { count: 0 };
+    sdrByUser[name].count++;
+  });
+
+  const sdrEntries = Object.entries(sdrByUser).slice(0, 6);
+  const gaugesSDREl = document.getElementById('gaugesSDR');
+  if (!sdrEntries.length) {
+    gaugesSDREl.innerHTML = '<div style="color:#64748b;font-size:13px;padding:16px">Sem dados de SDR</div>';
+  } else {
+    gaugesSDREl.innerHTML = sdrEntries.map(([name, u], i) => `
+      <div class="gauge-card">
+        <div class="gauge-title">SDR</div>
+        <div class="gauge-label">${name}</div>
+        <div class="gauge-canvas-wrap"><canvas id="gaugeSDR_${i}" width="180" height="100"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeSDR_${i}_pct">0%</div><div class="gauge-pct-sub">realizado</div></div></div>
+        <div class="gauge-bottom">Reuniões: <strong>${u.count}</strong> / Meta: <strong>${CONFIG.metaReunioes}</strong></div>
+        <div style="margin-top:6px;font-size:11px;color:${u.count >= CONFIG.metaReunioes ? '#10b981' : '#ef4444'}">
+          ${u.count >= CONFIG.metaReunioes ? '✓ Meta atingida' : 'Faltam ' + (CONFIG.metaReunioes - u.count) + ' reuniões'}
+        </div>
+      </div>
+    `).join('');
+    sdrEntries.forEach(([name, u], i) => {
+      drawGauge(`gaugeSDR_${i}`, u.count, CONFIG.metaReunioes, `gaugeSDR_${i}_pct`);
+    });
+  }
+}
+
+function drawGauge(canvasId, value, max, pctElId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const cx = w / 2, cy = h - 10;
+  const r = Math.min(w, h * 1.8) / 2 - 10;
+  const pct = Math.min(max > 0 ? value / max : 0, 1.5); // cap display at 150%
+  const startAngle = Math.PI;
+  const endAngle = Math.PI + Math.PI * Math.min(pct, 1);
+
+  // Background arc
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, Math.PI, 2 * Math.PI);
+  ctx.lineWidth = 14;
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Fill arc
+  const fillColor = pct >= 1 ? '#10b981' : pct >= 0.7 ? '#f59e0b' : '#ef4444';
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, startAngle, endAngle);
+  ctx.lineWidth = 14;
+  ctx.strokeStyle = fillColor;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Update pct text
+  const pctEl = document.getElementById(pctElId);
+  if (pctEl) {
+    const displayPct = max > 0 ? (value / max * 100).toFixed(0) : '0';
+    pctEl.textContent = displayPct + '%';
+    pctEl.style.color = fillColor;
+  }
+}
+
+// ─────────────────────────────────────────────
+// TAB 5: MOTIVOS DE PERDA
+// ─────────────────────────────────────────────
+function renderMotivoPerda(deals) {
+  const lost = deals.filter(d => d.status === 'lost');
+  const reasonMap = {};
+  lost.forEach(d => {
+    const r = d.lost_reason || 'Sem motivo';
+    reasonMap[r] = (reasonMap[r] || 0) + 1;
+  });
+
+  const total = lost.length;
+  const sorted = Object.entries(reasonMap).sort((a, b) => b[1] - a[1]);
+  const top7 = sorted.slice(0, 7);
+  const othersCount = sorted.slice(7).reduce((s, [,v]) => s + v, 0);
+  if (othersCount > 0) top7.push(['Outros', othersCount]);
+
+  // KPIs
+  document.getElementById('kpiMotivos').innerHTML = `
+    ${kcard('Total Perdidos', fmtNum(total), 'negócios perdidos', 'danger')}
+    ${kcard('Motivos Distintos', fmtNum(Object.keys(reasonMap).length), 'categorias identificadas', '')}
+    ${kcard('Principal Motivo', top7[0]?.[0]?.slice(0,20) || '—', `${top7[0]?.[1] || 0} ocorrências`, 'warning')}
+  `;
+
+  if (!total) {
+    destroyChart('chartMotivosBar');
+    destroyChart('chartMotivosTrend');
+    document.getElementById('tableMotivos').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:#64748b">Sem dados de perda</td></tr>';
+    document.getElementById('kpiCategorias').innerHTML = '';
+    return;
+  }
+
+  // Horizontal bar chart
+  const barLabels = top7.map(([k]) => k.length > 28 ? k.slice(0,28)+'…' : k);
+  const barValues = top7.map(([,v]) => v);
+  const barColors = barLabels.map((_, i) => i === 0 ? 'rgba(239,68,68,0.85)' : 'rgba(239,68,68,0.5)');
+
+  destroyChart('chartMotivosBar');
+  const ctx = document.getElementById('chartMotivosBar').getContext('2d');
+  chartsRegistry['chartMotivosBar'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: barLabels,
+      datasets: [{
+        label: 'Ocorrências',
+        data: barValues,
+        backgroundColor: barColors,
+        borderRadius: 5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { afterLabel: (ctx) => `${(ctx.raw / total * 100).toFixed(1)}% do total` } }
+      },
+      scales: {
+        y: { grid: { display: false }, ticks: { font: { size: 11 } } },
+        x: { grid: { color: '#f1f5f9' }, beginAtZero: true, ticks: { font: { size: 11 } } }
+      }
+    },
+    plugins: [{
+      id: 'pctLabels',
+      afterDatasetsDraw(chart) {
+        const meta2 = chart.getDatasetMeta(0);
+        const ctx2 = chart.ctx;
+        ctx2.save();
+        meta2.data.forEach((bar, i) => {
+          const pct = (barValues[i] / total * 100).toFixed(1);
+          ctx2.fillStyle = '#64748b';
+          ctx2.font = '10px Inter, sans-serif';
+          ctx2.textAlign = 'left';
+          ctx2.fillText(`${pct}%`, bar.x + 4, bar.y + 4);
+        });
+        ctx2.restore();
+      }
+    }]
+  });
+
+  // Trend chart — top 5 reasons by month
+  const months = lastNMonthKeys(6);
+  const labels = months.map(getMonthLabel);
+  const top5 = sorted.slice(0, 5);
+  const colors5 = ['#ef4444', '#f59e0b', '#2563eb', '#10b981', '#7c3aed'];
+
+  destroyChart('chartMotivosTrend');
+  const ctx2 = document.getElementById('chartMotivosTrend').getContext('2d');
+  chartsRegistry['chartMotivosTrend'] = new Chart(ctx2, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: top5.map(([reason], idx) => ({
+        label: reason.length > 20 ? reason.slice(0,20)+'…' : reason,
+        data: months.map(m => lost.filter(d => (d.lost_reason || 'Sem motivo') === reason && getMonthKey(d.close_time) === m).length),
+        borderColor: colors5[idx], backgroundColor: colors5[idx] + '20',
+        borderWidth: 2, pointRadius: 3, fill: false
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 } } },
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+
+  // Table
+  const prevMonthLost = lost.filter(d => {
+    const m = getMonthKey(d.close_time);
+    const prev = lastNMonthKeys(2)[0];
+    return m === prev;
+  });
+  const prevReasonMap = {};
+  prevMonthLost.forEach(d => { const r = d.lost_reason || 'Sem motivo'; prevReasonMap[r] = (prevReasonMap[r] || 0) + 1; });
+
+  const table = document.getElementById('tableMotivos');
+  table.innerHTML = `
+    <thead><tr><th>Motivo</th><th>Volume</th><th>%</th><th>Tendência vs Mês Anterior</th></tr></thead>
+    <tbody>
+    ${sorted.slice(0, 10).map(([reason, count]) => {
+      const prevCount = prevReasonMap[reason] || 0;
+      const trend = prevCount === 0 ? '🆕' : count > prevCount ? '↑' : count < prevCount ? '↓' : '→';
+      const trendColor = count > prevCount ? '#ef4444' : count < prevCount ? '#10b981' : '#64748b';
+      return `<tr>
+        <td><strong>${reason}</strong></td>
+        <td>${count}</td>
+        <td>${(count / total * 100).toFixed(1)}%</td>
+        <td><span style="color:${trendColor};font-size:16px;font-weight:700">${trend}</span> <span style="font-size:11px;color:#64748b">${prevCount > 0 ? `(${prevCount} ant.)` : ''}</span></td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  `;
+
+  // Categorization
+  const catCounts = {};
+  Object.keys(LOSS_CATEGORIES).forEach(cat => { catCounts[cat] = 0; });
+  lost.forEach(d => {
+    const r = (d.lost_reason || '').toLowerCase();
+    let assigned = false;
+    for (const [cat, keywords] of Object.entries(LOSS_CATEGORIES)) {
+      if (cat === 'Outros') continue;
+      if (keywords.some(kw => r.includes(kw))) { catCounts[cat]++; assigned = true; break; }
+    }
+    if (!assigned) catCounts['Outros']++;
+  });
+
+  const catColors = { 'Processo': '', 'Qualificação': 'warning', 'Oferta': 'danger', 'Concorrência': '', 'Outros': 'neutral' };
+  document.getElementById('kpiCategorias').innerHTML = Object.entries(catCounts).map(([cat, count]) =>
+    kcard(cat, fmtNum(count), `${total > 0 ? (count / total * 100).toFixed(1) : 0}% dos perdidos`, catColors[cat] || '')
+  ).join('');
+}
+
+// ─────────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────────
+function switchTab(idx) {
+  document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  activeTab = idx;
+  // Re-draw canvases when tab becomes visible
+  setTimeout(() => {
+    if (idx === 1) {
+      const deals = getFilteredDeals();
+      renderFunil(deals);
+    }
+    if (idx === 4) {
+      const deals = getFilteredDeals();
+      renderIndividual(deals);
+    }
+  }, 50);
+}
+
+// ─────────────────────────────────────────────
+// REFRESH TIMER
+// ─────────────────────────────────────────────
+function startRefreshTimer() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshSeconds = 7200;
+  updateRefreshDisplay();
+  refreshTimer = setInterval(() => {
+    refreshSeconds--;
+    updateRefreshDisplay();
+    if (refreshSeconds <= 0) {
+      refreshSeconds = 7200;
+      forceRefresh();
+    }
   }, 1000);
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-(function init(){
+function updateRefreshDisplay() {
+  const h = Math.floor(refreshSeconds / 3600);
+  const m = Math.floor((refreshSeconds % 3600) / 60);
+  const s = refreshSeconds % 60;
+  document.getElementById('refreshCountdown').textContent =
+    `${String(h).padStart(1,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function forceRefresh() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  init();
+}
+
+// ─────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // Set default date range: last 12 months
   const now = new Date();
-  setDates(new Date(now - 90*864e5), now);
-  S.filters.start = $('f-start').value;
-  S.filters.end   = $('f-end').value;
-  loadAll();
-  startRefresh();
-})();
+  const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+  document.getElementById('filterDateEnd').value = now.toISOString().slice(0,10);
+  document.getElementById('filterDateStart').value = yearAgo.toISOString().slice(0,10);
+  currentFilters.dateStart = yearAgo.toISOString().slice(0,10);
+  currentFilters.dateEnd = now.toISOString().slice(0,10);
+  init();
+});
 </script>
 </body>
 </html>
