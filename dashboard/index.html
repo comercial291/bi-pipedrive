@@ -1886,14 +1886,13 @@ function renderIndividual(deals) {
   drawGauge('gaugeEmpFat',    wonValue,  mFat,    'gaugeEmpFatPct');
   drawGauge('gaugeEmpContas', wonCount,  mContas, 'gaugeEmpContasPct');
 
-  // Closers — by user for Vendas pipeline, filtered by CONFIG.CLOSERS if set
-  const vendaPipe = allPipelines.find(p => p.name.toLowerCase().includes('vend'));
-  const closerDeals = vendaPipe ? deals.filter(d => d.pipeline_id === vendaPipe.id && d.status === 'won') : won;
+  // Closers — usa won já filtrado pelo tab; aplica CONFIG.CLOSERS só quando sem filtro de usuário
+  const userFiltered = f4.users && f4.users.length > 0;
   const closersByUser = {};
-  closerDeals.forEach(d => {
+  won.forEach(d => {
     const uid = d.user_id?.id || d.user_id;
     const name = allUsers[uid] || ('User ' + uid);
-    if (CONFIG.CLOSERS.length && !CONFIG.CLOSERS.some(c => name.toLowerCase().includes(c.toLowerCase()))) return;
+    if (!userFiltered && CONFIG.CLOSERS.length && !CONFIG.CLOSERS.some(c => name.toLowerCase().includes(c.toLowerCase()))) return;
     if (!closersByUser[name]) closersByUser[name] = { count: 0, value: 0 };
     closersByUser[name].count++;
     closersByUser[name].value += d.value || 0;
@@ -1928,16 +1927,12 @@ function renderIndividual(deals) {
   }
 
   // SDR — from pre-venda pipeline, count meetings (reunioes)
-  const sdrPipe = allPipelines.find(p => {
-    const n = p.name.toLowerCase();
-    return n.includes('pré') || n.includes('pre') || n.includes('sdr');
-  });
-  const sdrDeals = sdrPipe ? deals.filter(d => d.pipeline_id === sdrPipe.id) : [];
+  // SDR — usa deals já filtrados pelo tab; aplica CONFIG.SDRS só quando sem filtro de usuário
   const sdrByUser = {};
-  sdrDeals.forEach(d => {
+  deals.forEach(d => {
     const uid = d.user_id?.id || d.user_id;
     const name = allUsers[uid] || ('User ' + uid);
-    if (CONFIG.SDRS.length && !CONFIG.SDRS.some(s => name.toLowerCase().includes(s.toLowerCase()))) return;
+    if (!userFiltered && CONFIG.SDRS.length && !CONFIG.SDRS.some(s => name.toLowerCase().includes(s.toLowerCase()))) return;
     if (!sdrByUser[name]) sdrByUser[name] = { count: 0 };
     sdrByUser[name].count++;
   });
