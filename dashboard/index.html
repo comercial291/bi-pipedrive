@@ -552,7 +552,7 @@ const CONFIG = {
   benchmarkConversao: 30,
   // ── Defina aqui quem é Closer e quem é SDR (por nome exato do usuário no Pipedrive)
   // Se deixar vazio [], a classificação é feita automaticamente pelo pipeline
-  CLOSERS: ['Mauricio de Campos'],
+  CLOSERS: ['Maurício de Campos'],
   SDRS:    ['Erica']
 };
 
@@ -1887,12 +1887,13 @@ function renderIndividual(deals) {
   drawGauge('gaugeEmpContas', wonCount,  mContas, 'gaugeEmpContasPct');
 
   // Closers — usa won já filtrado pelo tab; aplica CONFIG.CLOSERS só quando sem filtro de usuário
+  const normStr = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const userFiltered = f4.users && f4.users.length > 0;
   const closersByUser = {};
   won.forEach(d => {
     const uid = d.user_id?.id || d.user_id;
     const name = allUsers[uid] || ('User ' + uid);
-    if (!userFiltered && CONFIG.CLOSERS.length && !CONFIG.CLOSERS.some(c => name.toLowerCase().includes(c.toLowerCase()))) return;
+    if (!userFiltered && CONFIG.CLOSERS.length && !CONFIG.CLOSERS.some(c => normStr(name).includes(normStr(c)))) return;
     if (!closersByUser[name]) closersByUser[name] = { count: 0, value: 0 };
     closersByUser[name].count++;
     closersByUser[name].value += d.value || 0;
@@ -1932,7 +1933,7 @@ function renderIndividual(deals) {
   deals.forEach(d => {
     const uid = d.user_id?.id || d.user_id;
     const name = allUsers[uid] || ('User ' + uid);
-    if (!userFiltered && CONFIG.SDRS.length && !CONFIG.SDRS.some(s => name.toLowerCase().includes(s.toLowerCase()))) return;
+    if (!userFiltered && CONFIG.SDRS.length && !CONFIG.SDRS.some(s => normStr(name).includes(normStr(s)))) return;
     if (!sdrByUser[name]) sdrByUser[name] = { count: 0 };
     sdrByUser[name].count++;
   });
