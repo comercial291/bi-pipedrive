@@ -1460,8 +1460,15 @@ function renderFunil(deals) {
     filteredDeals = deals.filter(d => String(d.pipeline_id) === String(activePipelineTab));
   }
 
-  // Build stage data
+  // Build stage data — pré-popula todos os stages do pipeline selecionado (mesmo os com 0 deals)
   const stageData = {};
+  if (activePipelineTab) {
+    Object.entries(allStages)
+      .filter(([, s]) => String(s.pipeline_id) === String(activePipelineTab))
+      .forEach(([sid, s]) => {
+        stageData[sid] = { ...s, id: sid, total: 0, won: 0, lost: 0, open: 0 };
+      });
+  }
   filteredDeals.forEach(d => {
     const sid = d.stage_id;
     if (!stageData[sid]) {
