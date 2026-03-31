@@ -1762,8 +1762,27 @@ function setTeamMetric(metric, btn) {
 // TAB 3: ATIVIDADES
 // ─────────────────────────────────────────────
 function renderAtividades() {
-  const open = allActivities;
-  const done = allActivitiesDone;
+  const f = tabFilters[3];
+
+  // Cria mapa de deal_id → pipeline_id para filtro por funil
+  const dealPipeMap = {};
+  allDeals.forEach(d => { dealPipeMap[d.id] = d.pipeline_id; });
+
+  const filterActs = (acts) => acts.filter(a => {
+    if (f.users && f.users.length && !f.users.includes(String(a.user_id))) return false;
+    const dateStr = (a.due_date || (a.add_time || '').slice(0,10));
+    if (f.dateStart && dateStr && dateStr < f.dateStart) return false;
+    if (f.dateEnd   && dateStr && dateStr > f.dateEnd)   return false;
+    if (f.pipelines && f.pipelines.length) {
+      const pipeId = a.deal_id ? dealPipeMap[a.deal_id] : null;
+      const pipeName = pipeId ? (allPipelines.find(p => p.id === pipeId)?.name || '') : '';
+      if (!f.pipelines.some(fp => matchesPipelineName(pipeName, fp))) return false;
+    }
+    return true;
+  });
+
+  const open = filterActs(allActivities);
+  const done = filterActs(allActivitiesDone);
   const all = [...open, ...done];
   const now = new Date();
   const todayStr = now.toISOString().slice(0, 10);
