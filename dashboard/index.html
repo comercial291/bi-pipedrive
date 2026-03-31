@@ -474,13 +474,13 @@ body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color
         <div class="tf-group"><span class="tf-label">Até</span><input type="date" class="tf-date" id="tf-4-end"></div>
         <button class="tf-btn" onclick="applyTabFilter(4)">Aplicar</button>
       </div>
-      <div class="section-hdr">Metas da Empresa</div>
+      <div class="section-hdr" id="hdrEmpresa">Metas da Empresa</div>
       <div class="gauge-grid" id="gaugesEmpresa"></div>
 
-      <div class="section-hdr">Closers — Metas Individuais</div>
+      <div class="section-hdr" id="hdrClosers">Closers — Metas Individuais</div>
       <div class="gauge-grid" id="gaugesClosers"></div>
 
-      <div class="section-hdr">SDR — Metas Individuais</div>
+      <div class="section-hdr" id="hdrSDR">SDR — Metas Individuais</div>
       <div class="gauge-grid" id="gaugesSDR"></div>
     </div>
 
@@ -1871,118 +1871,164 @@ function renderAtividades() {
 // TAB 4: INDIVIDUAL (GAUGES)
 // ─────────────────────────────────────────────
 function renderIndividual(deals) {
-  // ── Calcular quantos meses estão no período selecionado (tab 4) ───────
   const f4 = tabFilters[4];
+  const normStr = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+  // ── Período ───────────────────────────────────────────────────────────
   const msPerMonth = 1000 * 60 * 60 * 24 * 30.44;
   let months = 1;
-  if (f4.dateStart && f4.dateEnd) {
-    const ms = new Date(f4.dateEnd) - new Date(f4.dateStart);
-    months = Math.max(1, Math.round(ms / msPerMonth));
-  }
-  // Metas escaladas pelo período
-  const mFat    = CONFIG.metaFaturamento  * months;
-  const mContas = CONFIG.metaNovasContas  * months;
-  const mCContas= CONFIG.metaCloserContas * months;
-  const mCMRR   = CONFIG.metaCloserMRR   * months;
-  const mSDR    = CONFIG.metaReunioes     * months;
+  if (f4.dateStart && f4.dateEnd)
+    months = Math.max(1, Math.round((new Date(f4.dateEnd) - new Date(f4.dateStart)) / msPerMonth));
+  const mFat     = CONFIG.metaFaturamento  * months;
+  const mContas  = CONFIG.metaNovasContas  * months;
+  const mCContas = CONFIG.metaCloserContas * months;
+  const mCMRR    = CONFIG.metaCloserMRR    * months;
+  const mSDR     = CONFIG.metaReunioes     * months;
   const periodoLabel = months === 1 ? '(1 mês)' : `(${months} meses)`;
 
+  // ── Detectar papel do usuário selecionado ─────────────────────────────
+  const userFiltered = f4.users && f4.users.length > 0;
+  let selectedIsCloser = false, selectedIsSDR = false;
+  if (userFiltered) {
+    f4.users.forEach(uid => {
+      const name = allUsers[uid] || '';
+      if (CONFIG.CLOSERS.some(c => normStr(name).includes(normStr(c)))) selectedIsCloser = true;
+      if (CONFIG.SDRS.some(s   => normStr(name).includes(normStr(s)))) selectedIsSDR = true;
+    });
+    if (!selectedIsCloser && !selectedIsSDR) selectedIsCloser = true; // desconhecido = closer
+  }
+  const showCloser  = !userFiltered || selectedIsCloser;
+  const showSDR     = !userFiltered || selectedIsSDR;
+  const showEmpresa = showCloser; // metas empresa só aparecem para closers/sem filtro
+
+  // ── helper show/hide ──────────────────────────────────────────────────
+  const show = (id, vis) => { const el = document.getElementById(id); if(el) el.style.display = vis ? '' : 'none'; };
+
+  // ── Dados de Closer (deals ganhos) ────────────────────────────────────
   const won = deals.filter(d => d.status === 'won');
   const wonValue = won.reduce((s, d) => s + (d.value || 0), 0);
   const wonCount = won.length;
 
-  // Company goals
-  document.getElementById('gaugesEmpresa').innerHTML = `
-    <div class="gauge-card">
-      <div class="gauge-title">Empresa</div>
-      <div class="gauge-label">Faturamento Total</div>
-      <div style="font-size:10px;color:#94a3b8;text-align:center;margin-bottom:4px">Meta acumulada ${periodoLabel}</div>
-      <div class="gauge-canvas-wrap"><canvas id="gaugeEmpFat" width="180" height="100"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeEmpFatPct">0%</div><div class="gauge-pct-sub">realizado</div></div></div>
-      <div class="gauge-bottom">Meta: <strong>${fmtCurrency(mFat)}</strong> | Realiz.: <strong>${fmtCurrency(wonValue)}</strong></div>
-    </div>
-    <div class="gauge-card">
-      <div class="gauge-title">Empresa</div>
-      <div class="gauge-label">Novas Contas</div>
-      <div style="font-size:10px;color:#94a3b8;text-align:center;margin-bottom:4px">Meta acumulada ${periodoLabel}</div>
-      <div class="gauge-canvas-wrap"><canvas id="gaugeEmpContas" width="180" height="100"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeEmpContasPct">0%</div><div class="gauge-pct-sub">realizado</div></div></div>
-      <div class="gauge-bottom">Meta: <strong>${mContas}</strong> | Realiz.: <strong>${wonCount}</strong></div>
-    </div>
-  `;
-
-  drawGauge('gaugeEmpFat',    wonValue,  mFat,    'gaugeEmpFatPct');
-  drawGauge('gaugeEmpContas', wonCount,  mContas, 'gaugeEmpContasPct');
-
-  // Closers — usa won já filtrado pelo tab; aplica CONFIG.CLOSERS só quando sem filtro de usuário
-  const normStr = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  const userFiltered = f4.users && f4.users.length > 0;
-  const closersByUser = {};
-  won.forEach(d => {
-    const uid = d.user_id?.id || d.user_id;
-    const name = allUsers[uid] || ('User ' + uid);
-    if (!userFiltered && CONFIG.CLOSERS.length && !CONFIG.CLOSERS.some(c => normStr(name).includes(normStr(c)))) return;
-    if (!closersByUser[name]) closersByUser[name] = { count: 0, value: 0 };
-    closersByUser[name].count++;
-    closersByUser[name].value += d.value || 0;
-  });
-
-  const closerEntries = Object.entries(closersByUser).slice(0, 6);
-  const gaugesClosersEl = document.getElementById('gaugesClosers');
-  if (!closerEntries.length) {
-    gaugesClosersEl.innerHTML = '<div style="color:#64748b;font-size:13px;padding:16px">Sem dados de closers</div>';
-  } else {
-    gaugesClosersEl.innerHTML = closerEntries.map(([name, u], i) => `
+  // ── SEÇÃO: Metas da Empresa ───────────────────────────────────────────
+  show('hdrEmpresa', showEmpresa);
+  if (showEmpresa) {
+    document.getElementById('gaugesEmpresa').innerHTML = `
       <div class="gauge-card">
-        <div class="gauge-title">Closer</div>
-        <div class="gauge-label">${name}</div>
-        <div style="font-size:10px;color:#94a3b8;text-align:center;margin-bottom:6px">Meta acumulada ${periodoLabel}</div>
-        <div style="margin-bottom:8px">
-          <div style="font-size:11px;color:#64748b;margin-bottom:4px">Novas Contas</div>
-          <div class="gauge-canvas-wrap"><canvas id="gaugeC_${i}_contas" width="160" height="90"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeC_${i}_contasPct" style="font-size:18px">0%</div></div></div>
-          <div style="font-size:11px;color:#64748b;text-align:center">${u.count} / ${mCContas}</div>
-        </div>
-        <div>
-          <div style="font-size:11px;color:#64748b;margin-bottom:4px">MRR</div>
-          <div class="gauge-canvas-wrap"><canvas id="gaugeC_${i}_mrr" width="160" height="90"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeC_${i}_mrrPct" style="font-size:18px">0%</div></div></div>
-          <div style="font-size:11px;color:#64748b;text-align:center">${fmtCurrency(u.value)} / ${fmtCurrency(mCMRR)}</div>
-        </div>
+        <div class="gauge-title">Empresa</div>
+        <div class="gauge-label">Faturamento Total</div>
+        <div style="font-size:10px;color:#94a3b8;text-align:center;margin-bottom:4px">Meta acumulada ${periodoLabel}</div>
+        <div class="gauge-canvas-wrap"><canvas id="gaugeEmpFat" width="180" height="100"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeEmpFatPct">0%</div><div class="gauge-pct-sub">realizado</div></div></div>
+        <div class="gauge-bottom">Meta: <strong>${fmtCurrency(mFat)}</strong> | Realiz.: <strong>${fmtCurrency(wonValue)}</strong></div>
       </div>
-    `).join('');
-    closerEntries.forEach(([name, u], i) => {
-      drawGauge(`gaugeC_${i}_contas`, u.count, mCContas, `gaugeC_${i}_contasPct`);
-      drawGauge(`gaugeC_${i}_mrr`,   u.value,  mCMRR,   `gaugeC_${i}_mrrPct`);
-    });
+      <div class="gauge-card">
+        <div class="gauge-title">Empresa</div>
+        <div class="gauge-label">Novas Contas</div>
+        <div style="font-size:10px;color:#94a3b8;text-align:center;margin-bottom:4px">Meta acumulada ${periodoLabel}</div>
+        <div class="gauge-canvas-wrap"><canvas id="gaugeEmpContas" width="180" height="100"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeEmpContasPct">0%</div><div class="gauge-pct-sub">realizado</div></div></div>
+        <div class="gauge-bottom">Meta: <strong>${mContas}</strong> | Realiz.: <strong>${wonCount}</strong></div>
+      </div>`;
+    drawGauge('gaugeEmpFat',    wonValue, mFat,    'gaugeEmpFatPct');
+    drawGauge('gaugeEmpContas', wonCount, mContas, 'gaugeEmpContasPct');
+  } else {
+    document.getElementById('gaugesEmpresa').innerHTML = '';
   }
 
-  // SDR — from pre-venda pipeline, count meetings (reunioes)
-  // SDR — usa deals já filtrados pelo tab; aplica CONFIG.SDRS só quando sem filtro de usuário
-  const sdrByUser = {};
-  deals.forEach(d => {
-    const uid = d.user_id?.id || d.user_id;
-    const name = allUsers[uid] || ('User ' + uid);
-    if (!userFiltered && CONFIG.SDRS.length && !CONFIG.SDRS.some(s => normStr(name).includes(normStr(s)))) return;
-    if (!sdrByUser[name]) sdrByUser[name] = { count: 0 };
-    sdrByUser[name].count++;
-  });
-
-  const sdrEntries = Object.entries(sdrByUser).slice(0, 6);
-  const gaugesSDREl = document.getElementById('gaugesSDR');
-  if (!sdrEntries.length) {
-    gaugesSDREl.innerHTML = '<div style="color:#64748b;font-size:13px;padding:16px">Sem dados de SDR</div>';
-  } else {
-    gaugesSDREl.innerHTML = sdrEntries.map(([name, u], i) => `
-      <div class="gauge-card">
-        <div class="gauge-title">SDR</div>
-        <div class="gauge-label">${name}</div>
-        <div class="gauge-canvas-wrap"><canvas id="gaugeSDR_${i}" width="180" height="100"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeSDR_${i}_pct">0%</div><div class="gauge-pct-sub">realizado</div></div></div>
-        <div class="gauge-bottom">Reuniões: <strong>${u.count}</strong> / Meta: <strong>${mSDR}</strong> ${periodoLabel}</div>
-        <div style="margin-top:6px;font-size:11px;color:${u.count >= mSDR ? '#10b981' : '#ef4444'}">
-          ${u.count >= mSDR ? '✓ Meta atingida' : 'Faltam ' + (mSDR - u.count) + ' reuniões'}
-        </div>
-      </div>
-    `).join('');
-    sdrEntries.forEach(([name, u], i) => {
-      drawGauge(`gaugeSDR_${i}`, u.count, mSDR, `gaugeSDR_${i}_pct`);
+  // ── SEÇÃO: Closers ────────────────────────────────────────────────────
+  show('hdrClosers', showCloser);
+  const gaugesClosersEl = document.getElementById('gaugesClosers');
+  if (showCloser) {
+    const closersByUser = {};
+    won.forEach(d => {
+      const uid = d.user_id?.id || d.user_id;
+      const name = allUsers[uid] || ('User ' + uid);
+      if (!userFiltered && CONFIG.CLOSERS.length && !CONFIG.CLOSERS.some(c => normStr(name).includes(normStr(c)))) return;
+      if (!closersByUser[name]) closersByUser[name] = { count: 0, value: 0 };
+      closersByUser[name].count++;
+      closersByUser[name].value += d.value || 0;
     });
+    const closerEntries = Object.entries(closersByUser).slice(0, 6);
+    if (!closerEntries.length) {
+      gaugesClosersEl.innerHTML = '<div style="color:#64748b;font-size:13px;padding:16px">Sem dados de closers</div>';
+    } else {
+      gaugesClosersEl.innerHTML = closerEntries.map(([name, u], i) => `
+        <div class="gauge-card">
+          <div class="gauge-title">Closer</div>
+          <div class="gauge-label">${name}</div>
+          <div style="font-size:10px;color:#94a3b8;text-align:center;margin-bottom:6px">Meta acumulada ${periodoLabel}</div>
+          <div style="margin-bottom:8px">
+            <div style="font-size:11px;color:#64748b;margin-bottom:4px">Novas Contas</div>
+            <div class="gauge-canvas-wrap"><canvas id="gaugeC_${i}_contas" width="160" height="90"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeC_${i}_contasPct" style="font-size:18px">0%</div></div></div>
+            <div style="font-size:11px;color:#64748b;text-align:center">${u.count} / ${mCContas}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:#64748b;margin-bottom:4px">MRR</div>
+            <div class="gauge-canvas-wrap"><canvas id="gaugeC_${i}_mrr" width="160" height="90"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeC_${i}_mrrPct" style="font-size:18px">0%</div></div></div>
+            <div style="font-size:11px;color:#64748b;text-align:center">${fmtCurrency(u.value)} / ${fmtCurrency(mCMRR)}</div>
+          </div>
+        </div>`).join('');
+      closerEntries.forEach(([name, u], i) => {
+        drawGauge(`gaugeC_${i}_contas`, u.count, mCContas, `gaugeC_${i}_contasPct`);
+        drawGauge(`gaugeC_${i}_mrr`,   u.value,  mCMRR,   `gaugeC_${i}_mrrPct`);
+      });
+    }
+  } else {
+    gaugesClosersEl.innerHTML = '';
+  }
+
+  // ── SEÇÃO: SDR ────────────────────────────────────────────────────────
+  show('hdrSDR', showSDR);
+  const gaugesSDREl = document.getElementById('gaugesSDR');
+  if (showSDR) {
+    // Reuniões agendadas = deals no stage "Reunião Agendada" do pipeline Pré-vendas
+    const reuniaoStageIds = new Set(
+      Object.entries(allStages)
+        .filter(([, s]) => s.name.toLowerCase().includes('reuni'))
+        .map(([id]) => Number(id))
+    );
+    const prePipe = allPipelines.find(p => {
+      const n = p.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      return n.includes('pre') || n.includes('sdr');
+    });
+    // Usar todos os deals do Pré-vendas para contar reuniões (com filtro de usuário/data)
+    const sdrSource = (prePipe ? allDeals.filter(d => d.pipeline_id === prePipe.id) : allDeals)
+      .filter(d => {
+        if (userFiltered && !f4.users.includes(String(d.user_id?.id || d.user_id))) return false;
+        const c = (d.add_time || '').slice(0,10);
+        if (f4.dateStart && c < f4.dateStart) return false;
+        if (f4.dateEnd   && c > f4.dateEnd)   return false;
+        return true;
+      });
+    const sdrByUser = {};
+    sdrSource.forEach(d => {
+      const uid = d.user_id?.id || d.user_id;
+      const name = allUsers[uid] || ('User ' + uid);
+      if (!userFiltered && CONFIG.SDRS.length && !CONFIG.SDRS.some(s => normStr(name).includes(normStr(s)))) return;
+      if (!sdrByUser[name]) sdrByUser[name] = { total: 0, reunioes: 0 };
+      sdrByUser[name].total++;
+      if (reuniaoStageIds.has(d.stage_id)) sdrByUser[name].reunioes++;
+    });
+    const sdrEntries = Object.entries(sdrByUser).slice(0, 6);
+    if (!sdrEntries.length) {
+      gaugesSDREl.innerHTML = '<div style="color:#64748b;font-size:13px;padding:16px">Sem dados de SDR</div>';
+    } else {
+      gaugesSDREl.innerHTML = sdrEntries.map(([name, u], i) => `
+        <div class="gauge-card">
+          <div class="gauge-title">SDR</div>
+          <div class="gauge-label">${name}</div>
+          <div style="font-size:10px;color:#94a3b8;text-align:center;margin-bottom:4px">Meta acumulada ${periodoLabel}</div>
+          <div class="gauge-canvas-wrap"><canvas id="gaugeSDR_${i}" width="180" height="100"></canvas><div class="gauge-center-text"><div class="gauge-pct" id="gaugeSDR_${i}_pct">0%</div><div class="gauge-pct-sub">realizado</div></div></div>
+          <div class="gauge-bottom">Reuniões Agendadas: <strong>${u.reunioes}</strong> / Meta: <strong>${mSDR}</strong> ${periodoLabel}</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px">Leads no funil: ${u.total}</div>
+          <div style="margin-top:6px;font-size:11px;color:${u.reunioes >= mSDR ? '#10b981' : '#ef4444'}">
+            ${u.reunioes >= mSDR ? '✓ Meta atingida' : 'Faltam ' + (mSDR - u.reunioes) + ' reuniões'}
+          </div>
+        </div>`).join('');
+      sdrEntries.forEach(([name, u], i) => {
+        drawGauge(`gaugeSDR_${i}`, u.reunioes, mSDR, `gaugeSDR_${i}_pct`);
+      });
+    }
+  } else {
+    gaugesSDREl.innerHTML = '';
   }
 }
 
