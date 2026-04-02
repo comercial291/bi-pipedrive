@@ -990,8 +990,12 @@ function getFilteredDealsForTab(tabIdx) {
       if (!f.pipelines.some(fp => matchesPipelineName(pipeName, fp))) return false;
     }
     if (f.users && f.users.length && !f.users.includes(String(d.user_id?.id || d.user_id))) return false;
-    if (f.dateStart) { const c=(d.add_time||'').slice(0,10); if(c < f.dateStart) return false; }
-    if (f.dateEnd)   { const c=(d.add_time||'').slice(0,10); if(c > f.dateEnd)   return false; }
+    // Para negócios ganhos/perdidos usa close_time; para abertos usa add_time
+    const dateRef = (d.status === 'won' || d.status === 'lost')
+      ? ((d.close_time || d.won_time || d.lost_time || d.add_time || '').slice(0,10))
+      : ((d.add_time || '').slice(0,10));
+    if (f.dateStart && dateRef && dateRef < f.dateStart) return false;
+    if (f.dateEnd   && dateRef && dateRef > f.dateEnd)   return false;
     return true;
   });
 }
